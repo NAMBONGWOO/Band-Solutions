@@ -73,73 +73,93 @@
             }
         });
     </script>
-    <script type="module">
-        // 1. Firebase 라이브러리 불러오기 (CDN 방식)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. 봉우님의 Firebase 설정값
-        const firebaseConfig = {
-            apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
-            authDomain: "band-solutions.firebaseapp.com",
-            projectId: "band-solutions",
-            storageBucket: "band-solutions.firebasestorage.app",
-            messagingSenderId: "1094046119043",
-            appId: "1:1094046119043:web:e70814fad4cc0fea7097b6",
-            measurementId: "G-XH3YYL86JN"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
+        authDomain: "band-solutions.firebaseapp.com",
+        projectId: "band-solutions",
+        storageBucket: "band-solutions.firebasestorage.app",
+        messagingSenderId: "1094046119043",
+        appId: "1:1094046119043:web:e70814fad4cc0fea7097b6",
+        measurementId: "G-XH3YYL86JN"
+    };
 
-        // 3. 초기화
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // 4. 입장 버튼 클릭 이벤트 로직
-        document.getElementById('entryForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const inviteCode = document.getElementById('inviteCode').value.toUpperCase();
-            const birthdate = document.getElementById('birthdate').value;
-            const part = inviteCode.split('-')[0]; 
+    document.getElementById('entryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const inviteCode = document.getElementById('inviteCode').value.toUpperCase();
+        const birthdate = document.getElementById('birthdate').value;
 
-            if (!part || birthdate.length !== 6) {
-                alert("초대코드와 생일 6자리를 정확히 입력해주세요.");
+        // 1. 관리자(MASTER) 체크
+        if (inviteCode === "MASTER-7777") {
+            try {
+                const adminRef = doc(db, "usan_band", "LEADER");
+                await setDoc(adminRef, {
+                    part: "LEADER",
+                    birth: birthdate,
+                    role: "admin", // 관리자 권한 부여
+                    joinedAt: new Date().toISOString()
+                });
+                alert("반갑습니다, 리더님! 관리자 모드로 입장합니다.");
+                enterDashboard("LEADER", "admin");
+                return; // 마스터 코드일 경우 여기서 종료
+            } catch (error) {
+                console.error("관리자 등록 오류:", error);
+                alert("관리자 등록 중 오류가 발생했습니다.");
                 return;
             }
-
-            try {
-                const memberRef = doc(db, "usan_band", part);
-                const docSnap = await getDoc(memberRef);
-
-                if (docSnap.exists()) {
-                    if (docSnap.data().birth === birthdate) {
-                        alert(`${part} 세션님, 환영합니다!`);
-                        enterDashboard(part);
-                    } else {
-                        alert("이미 등록된 파트입니다. 정보를 확인해주세요.");
-                    }
-                } else {
-                    await setDoc(memberRef, {
-                        part: part,
-                        birth: birthdate,
-                        joinedAt: new Date().toISOString(),
-                        role: 'member'
-                    });
-                    alert(`우산속밴드 ${part} 세션으로 등록되었습니다!`);
-                    enterDashboard(part);
-                }
-            } catch (error) {
-                console.error("오류 발생:", error);
-                alert("Firebase 설정이나 권한을 확인해주세요.");
-            }
-        });
-
-        function enterDashboard(part) {
-            localStorage.setItem('myPart', part);
-            // 페이지 이동 (현재는 파일이 없으므로 주의)
-            // window.location.href = 'dashboard.html'; 
-            console.log("대시보드로 이동 준비 완료:", part);
         }
-    </script>
+
+        // 2. 일반 멤버 체크 (기존 로직)
+        const part = inviteCode.split('-')[0]; 
+        if (!part || birthdate.length !== 6) {
+            alert("초대코드와 생일 6자리를 정확히 입력해주세요.");
+            return;
+        }
+
+        try {
+            const memberRef = doc(db, "usan_band", part);
+            const docSnap = await getDoc(memberRef);
+
+            if (docSnap.exists()) {
+                if (docSnap.data().birth === birthdate) {
+                    alert(`${part} 세션님, 환영합니다!`);
+                    enterDashboard(part, docSnap.data().role || "member");
+                } else {
+                    alert("이미 등록된 파트입니다. 정보를 확인해주세요.");
+                }
+            } else {
+                await setDoc(memberRef, {
+                    part: part,
+                    birth: birthdate,
+                    role: "member",
+                    joinedAt: new Date().toISOString()
+                });
+                alert(`우산속밴드 ${part} 세션으로 등록되었습니다!`);
+                enterDashboard(part, "member");
+            }
+        } catch (error) {
+            console.error("오류 발생:", error);
+            alert("Firebase 설정이나 권한을 확인해주세요.");
+        }
+    });
+
+    function enterDashboard(part, role) {
+        // 세션 정보와 권한을 로컬스토리지에 저장하여 다음 페이지에서 활용
+        localStorage.setItem('myPart', part);
+        localStorage.setItem('myRole', role);
+        
+        // 대시보드 파일이 아직 없으므로 콘솔로그로 확인 후 나중에 주석 해제
+        console.log(`입장 완료 - 파트: ${part}, 권한: ${role}`);
+        // window.location.href = 'dashboard.html'; 
+    }
+</script>
 </body>
 </html>
 </body>
