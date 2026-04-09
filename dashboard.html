@@ -258,7 +258,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const myPart = localStorage.getItem('myPart');
-const myRole = localStorage.getItem('myRole');
 if (!myPart) { location.href = 'index.html'; }
 
 document.getElementById('hd-part').textContent = `PART: ${myPart}`;
@@ -266,15 +265,33 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     if (confirm('로그아웃 하시겠습니까?')) { localStorage.clear(); location.href = 'index.html'; }
 });
 
-// ── 권한에 따른 UI 제어 ──
-if (myRole === 'admin') {
-    document.getElementById('admin-panel').classList.remove('hidden');
-    document.getElementById('nav-members-btn').classList.remove('hidden');
-    document.getElementById('create-vote-section').classList.remove('hidden');
+// ── role은 Firebase에서 실시간으로 읽음 (admin이 변경 즉시 반영) ──
+let myRole = localStorage.getItem('myRole') || 'member';
+applyRoleUI(myRole); // 초기 렌더 (깜빡임 방지)
+
+onSnapshot(doc(db, 'usan_band', myPart), (snap) => {
+    if (!snap.exists()) return;
+    myRole = snap.data().role || 'member';
+    localStorage.setItem('myRole', myRole);
+    applyRoleUI(myRole);
+});
+
+function applyRoleUI(role) {
+    const isLeader = (role === 'leader');
+    document.getElementById('admin-panel').classList.toggle('hidden', !isLeader);
+    document.getElementById('nav-members-btn').classList.toggle('hidden', !isLeader);
+    document.getElementById('create-vote-section').classList.toggle('hidden', !isLeader);
+    document.getElementById('confirm-vote-btn').classList.toggle('hidden', !isLeader);
     document.getElementById('progress-section').classList.remove('hidden');
-    document.getElementById('confirm-vote-btn').classList.remove('hidden');
-} else {
-    document.getElementById('progress-section').classList.remove('hidden');
+    // 헤더 뱃지
+    const badge = document.getElementById('hd-part');
+    if (isLeader) {
+        badge.textContent = `🎸 리더 · ${myPart}`;
+        badge.style.color = '#fbbf24';
+    } else {
+        badge.textContent = `PART: ${myPart}`;
+        badge.style.color = '#60a5fa';
+    }
 }
 
 // ══════════════════════════════
