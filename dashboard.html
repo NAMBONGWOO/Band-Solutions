@@ -2,112 +2,671 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우산속밴드 - 대시보드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>우산속밴드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #f3f4f6; font-family: 'Noto Sans KR', sans-serif; }
-        .admin-only { display: none; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f4f8; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #1d4ed8; }
+        .nav-btn.active .nav-icon-bg { background-color: #dbeafe; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.open { display: flex; }
+        input[type="checkbox"] { width:18px; height:18px; accent-color:#2563eb; cursor:pointer; }
+        .vote-bar { transition: width 0.4s ease; }
+        .file-row:hover { background-color: #f9fafb; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-md mx-auto space-y-6 pb-10">
-        
-        <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm">
-            <div>
-                <h2 id="userPart" class="text-blue-600 font-bold text-xs uppercase">PART</h2>
-                <h1 class="text-xl font-bold text-gray-800">우산속밴드 아지트</h1>
-            </div>
-            <button id="logoutBtn" class="text-gray-400 text-sm font-medium">로그아웃</button>
-        </div>
+<body class="pb-24">
 
-        <div id="adminPanel" class="admin-only bg-blue-600 p-6 rounded-3xl shadow-xl space-y-4">
-            <h3 class="font-bold text-blue-100 text-sm">🌟 리더 전용 관리 도구</h3>
-            <div class="grid grid-cols-2 gap-3">
-                <button class="bg-white text-blue-600 p-3 rounded-2xl text-sm font-bold shadow-sm">📅 투표 생성</button>
-                <button class="bg-blue-500 text-white p-3 rounded-2xl text-sm font-bold border border-blue-400">📝 공지 작성</button>
-            </div>
+<!-- ────────── 상단 헤더 ────────── -->
+<div class="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white text-lg">☂️</div>
+        <div>
+            <p id="hd-part" class="text-xs font-bold text-blue-500 uppercase">PART</p>
+            <p class="text-sm font-bold text-gray-800 leading-none">우산속밴드</p>
         </div>
+    </div>
+    <button id="logoutBtn" class="text-xs text-gray-400 border border-gray-200 px-3 py-1.5 rounded-xl">로그아웃</button>
+</div>
 
-        <div id="memberManagement" class="admin-only bg-white p-6 rounded-3xl shadow-sm space-y-4">
-            <h3 class="font-bold text-gray-800 flex justify-between">
-                👥 멤버 현황 <span id="memberCount" class="text-blue-500 text-xs font-normal">0명</span>
-            </h3>
-            <ul id="memberList" class="space-y-2"></ul>
-        </div>
+<!-- ────────── 탭 콘텐츠 ────────── -->
+<div class="max-w-md mx-auto px-4 pt-4 space-y-0">
 
-        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
-            <h3 class="font-bold text-gray-800">합주 일정</h3>
-            <div id="scheduleStatus" class="p-10 text-center border-2 border-dashed border-gray-100 rounded-2xl text-gray-400 text-sm">
-                현재 진행 중인 투표가 없습니다.
+    <!-- ① 홈 탭 -->
+    <div id="tab-home" class="tab-content active space-y-4">
+        <!-- 리더 전용 관리 패널 -->
+        <div id="admin-panel" class="hidden bg-blue-600 rounded-2xl p-4 space-y-3">
+            <p class="text-blue-100 text-xs font-bold">🌟 리더 관리 도구</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="openTab('schedule')" class="bg-white text-blue-600 py-2.5 rounded-xl text-sm font-bold">📅 투표 만들기</button>
+                <button onclick="openModal('noticeModal')" class="bg-blue-500 border border-blue-400 text-white py-2.5 rounded-xl text-sm font-bold">📢 공지 올리기</button>
+                <button onclick="openModal('songModal')" class="bg-blue-500 border border-blue-400 text-white py-2.5 rounded-xl text-sm font-bold">🎵 곡 추가</button>
+                <button onclick="openTab('members')" class="bg-white text-blue-600 py-2.5 rounded-xl text-sm font-bold">👥 멤버 관리</button>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
-            <h3 class="font-bold text-gray-800">연습곡 자료실</h3>
-            <div class="text-center p-6 text-gray-400 text-sm">곡 정보가 없습니다.</div>
+        <!-- D-day 카드 -->
+        <div id="dday-card" class="bg-white rounded-2xl p-4 shadow-sm">
+            <p class="text-xs text-gray-400 font-medium mb-1">다음 합주</p>
+            <div id="dday-content" class="text-gray-400 text-sm text-center py-4">확정된 합주 일정이 없습니다</div>
+        </div>
+
+        <!-- 공지 피드 -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <p class="text-xs font-bold text-gray-500 mb-3">📢 공지</p>
+            <div id="notice-feed" class="space-y-2 text-sm text-gray-400 text-center py-2">공지가 없습니다</div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- ② 스케줄 & 투표 탭 -->
+    <div id="tab-schedule" class="tab-content space-y-4">
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
-            authDomain: "band-solutions.firebaseapp.com",
-            projectId: "band-solutions",
-            storageBucket: "band-solutions.firebasestorage.app",
-            messagingSenderId: "1094046119043",
-            appId: "1:1094046119043:web:e70814fad4cc0fea7097b6",
-            measurementId: "G-XH3YYL86JN"
-        };
+        <!-- 확정 일정 표시 -->
+        <div id="confirmed-schedule" class="hidden bg-green-50 border border-green-200 rounded-2xl p-4">
+            <p class="text-xs font-bold text-green-600 mb-1">✅ 확정된 합주일</p>
+            <p id="confirmed-date-text" class="text-base font-bold text-green-800"></p>
+            <p class="text-xs text-green-600 mt-1">스케줄이 자동 등록되었습니다</p>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        <!-- 투표 진행 중 -->
+        <div id="vote-section" class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+            <div class="flex justify-between items-center">
+                <p class="text-sm font-bold text-gray-700">합주 날짜 투표</p>
+                <span id="vote-status-badge" class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">대기 중</span>
+            </div>
+            <div id="vote-options" class="space-y-2 text-sm text-gray-400 text-center py-4">진행 중인 투표가 없습니다</div>
+            <button id="submit-vote-btn" class="hidden w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">내 가능한 날짜 투표하기</button>
+            <button id="confirm-vote-btn" class="hidden w-full py-3 bg-green-600 text-white font-bold rounded-xl text-sm">✅ 최다 득표일로 확정하기 (리더)</button>
+        </div>
 
-        const myPart = localStorage.getItem('myPart');
-        const myRole = localStorage.getItem('myRole');
+        <!-- 리더: 투표 만들기 -->
+        <div id="create-vote-section" class="hidden bg-white rounded-2xl p-4 shadow-sm space-y-3">
+            <p class="text-sm font-bold text-gray-700">📅 새 투표 만들기</p>
+            <div id="date-inputs" class="space-y-2">
+                <div class="flex gap-2">
+                    <input type="date" class="vote-date-input flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                    <input type="time" class="vote-time-input w-28 px-3 py-2 border border-gray-200 rounded-xl text-sm" value="14:00">
+                </div>
+            </div>
+            <button onclick="addDateInput()" class="w-full py-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-500">+ 날짜 후보 추가</button>
+            <input type="text" id="vote-deadline" placeholder="투표 마감일 (예: 4월 21일까지)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+            <button onclick="createVote()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">투표 시작하기</button>
+        </div>
+    </div>
 
-        if (!myPart) { location.href = 'index.html'; }
-        document.getElementById('userPart').innerText = `PART: ${myPart}`;
+    <!-- ③ 자료실 탭 -->
+    <div id="tab-files" class="tab-content space-y-4">
+        <div id="folder-list-view" class="space-y-3">
+            <button onclick="openFolder('scores')" class="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 text-left">
+                <span class="text-2xl">📄</span>
+                <div><p class="font-bold text-gray-800 text-sm">악보</p><p class="text-xs text-gray-400">파트별 악보 PDF</p></div>
+                <span class="ml-auto text-gray-300">›</span>
+            </button>
+            <button onclick="openFolder('tracks')" class="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 text-left">
+                <span class="text-2xl">🎧</span>
+                <div><p class="font-bold text-gray-800 text-sm">파트별 음원</p><p class="text-xs text-gray-400">AI 트랙분리 MP3</p></div>
+                <span class="ml-auto text-gray-300">›</span>
+            </button>
+            <button onclick="openFolder('refs')" class="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 text-left">
+                <span class="text-2xl">📎</span>
+                <div><p class="font-bold text-gray-800 text-sm">참고 자료</p><p class="text-xs text-gray-400">영상 링크, 메모</p></div>
+                <span class="ml-auto text-gray-300">›</span>
+            </button>
+        </div>
 
-        // 로그아웃 로직
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            if(confirm("로그아웃 하시겠습니까?")) {
-                localStorage.clear();
-                location.href = 'index.html';
-            }
+        <div id="folder-detail-view" class="hidden space-y-3">
+            <div class="flex items-center gap-2">
+                <button onclick="closeFolder()" class="text-blue-600 text-sm font-medium">‹ 뒤로</button>
+                <p id="folder-title" class="text-sm font-bold text-gray-700"></p>
+            </div>
+            <div id="file-list-container" class="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-50"></div>
+            <div id="admin-upload-area" class="hidden">
+                <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+                    <p class="text-xs font-bold text-gray-500">파일 업로드</p>
+                    <input type="text" id="upload-filename" placeholder="파일명 (예: Bohemian_기타.pdf)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                    <input type="text" id="upload-url" placeholder="다운로드 URL 또는 링크" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                    <input type="text" id="upload-size" placeholder="파일 크기 (예: 2.1MB)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                    <button onclick="uploadFile()" class="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm">업로드</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ④ 연습곡 탭 -->
+    <div id="tab-songs" class="tab-content space-y-4">
+        <div class="flex gap-2 overflow-x-auto pb-1">
+            <button onclick="filterSongs('all',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-blue-600 text-white rounded-full text-xs font-bold">전체</button>
+            <button onclick="filterSongs('candidate',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">후보곡</button>
+            <button onclick="filterSongs('practice',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">연습중</button>
+            <button onclick="filterSongs('done',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">완료</button>
+        </div>
+        <div id="song-list" class="space-y-3"></div>
+        <div id="progress-section" class="hidden bg-white rounded-2xl p-4 shadow-sm space-y-3">
+            <p class="text-sm font-bold text-gray-700">내 연습 진도 업데이트</p>
+            <select id="progress-song-select" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                <option value="">곡 선택...</option>
+            </select>
+            <div class="flex items-center gap-3">
+                <input type="range" id="progress-range" min="0" max="100" step="5" value="50" class="flex-1">
+                <span id="progress-val" class="text-sm font-bold text-blue-600 w-10 text-right">50%</span>
+            </div>
+            <button onclick="updateProgress()" class="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm">진도 저장</button>
+        </div>
+    </div>
+
+    <!-- ⑤ 멤버 탭 (리더만) -->
+    <div id="tab-members" class="tab-content space-y-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-sm font-bold text-gray-700">👥 멤버 현황</p>
+                <span id="member-count" class="text-xs text-blue-500 font-bold">0명</span>
+            </div>
+            <ul id="member-list-admin" class="space-y-2"></ul>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+            <p class="text-xs font-bold text-gray-500">초대 코드 안내</p>
+            <p class="text-xs text-gray-500 leading-relaxed">멤버에게 파트 코드를 전달하세요. 형식: <span class="font-bold text-blue-600">파트명-숫자</span><br>예) VOCAL-1234, GUITAR-5678, BASS-9012, DRUM-3456, KEY-7890</p>
+            <div class="bg-blue-50 rounded-xl p-3 text-xs text-blue-700 font-mono space-y-1">
+                <p>VOCAL-1234</p><p>GUITAR-5678</p><p>BASS-9012</p><p>DRUM-3456</p><p>KEY-7890</p>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end max-w-md -->
+
+<!-- ────────── 하단 네비게이션 ────────── -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg z-40">
+    <div class="max-w-md mx-auto flex justify-around py-2">
+        <button onclick="openTab('home')" class="nav-btn active flex flex-col items-center gap-0.5 px-3 py-1">
+            <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base bg-blue-50">🏠</span>
+            <span class="text-xs text-gray-500">홈</span>
+        </button>
+        <button onclick="openTab('schedule')" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1">
+            <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">📅</span>
+            <span class="text-xs text-gray-500">스케줄</span>
+        </button>
+        <button onclick="openTab('files')" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1">
+            <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">📁</span>
+            <span class="text-xs text-gray-500">자료실</span>
+        </button>
+        <button onclick="openTab('songs')" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1">
+            <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">🎵</span>
+            <span class="text-xs text-gray-500">연습곡</span>
+        </button>
+        <button id="nav-members-btn" onclick="openTab('members')" class="nav-btn hidden flex flex-col items-center gap-0.5 px-3 py-1">
+            <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">👥</span>
+            <span class="text-xs text-gray-500">멤버</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ────────── 모달: 공지 작성 ────────── -->
+<div id="noticeModal" class="modal-overlay">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-3">
+        <p class="font-bold text-gray-800">📢 공지 올리기</p>
+        <input type="text" id="notice-title" placeholder="제목" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+        <textarea id="notice-body" rows="3" placeholder="내용을 입력하세요" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm resize-none"></textarea>
+        <div class="flex gap-2">
+            <button onclick="closeModal('noticeModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
+            <button onclick="postNotice()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">올리기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ────────── 모달: 연습곡 추가 ────────── -->
+<div id="songModal" class="modal-overlay">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-3">
+        <p class="font-bold text-gray-800">🎵 연습곡 추가</p>
+        <input type="text" id="song-title-input" placeholder="곡 제목" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+        <input type="text" id="song-artist-input" placeholder="아티스트" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+        <select id="song-status-input" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+            <option value="candidate">후보곡</option>
+            <option value="practice">연습중</option>
+            <option value="done">완료</option>
+        </select>
+        <div class="flex gap-2">
+            <button onclick="closeModal('songModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
+            <button onclick="addSong()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">추가</button>
+        </div>
+    </div>
+</div>
+
+<!-- ────────── Firebase + 앱 로직 ────────── -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+    getFirestore, collection, doc,
+    onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, getDoc,
+    query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
+    authDomain: "band-solutions.firebaseapp.com",
+    projectId: "band-solutions",
+    storageBucket: "band-solutions.firebasestorage.app",
+    messagingSenderId: "1094046119043",
+    appId: "1:1094046119043:web:e70814fad4cc0fea7097b6"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const myPart = localStorage.getItem('myPart');
+const myRole = localStorage.getItem('myRole');
+if (!myPart) { location.href = 'index.html'; }
+
+document.getElementById('hd-part').textContent = `PART: ${myPart}`;
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (confirm('로그아웃 하시겠습니까?')) { localStorage.clear(); location.href = 'index.html'; }
+});
+
+// ── 권한에 따른 UI 제어 ──
+if (myRole === 'admin') {
+    document.getElementById('admin-panel').classList.remove('hidden');
+    document.getElementById('nav-members-btn').classList.remove('hidden');
+    document.getElementById('create-vote-section').classList.remove('hidden');
+    document.getElementById('progress-section').classList.remove('hidden');
+    document.getElementById('confirm-vote-btn').classList.remove('hidden');
+} else {
+    document.getElementById('progress-section').classList.remove('hidden');
+}
+
+// ══════════════════════════════
+// 공지 피드
+// ══════════════════════════════
+onSnapshot(query(collection(db, 'usan_notices'), orderBy('createdAt','desc')), snap => {
+    const feed = document.getElementById('notice-feed');
+    if (snap.empty) { feed.innerHTML = '<p class="text-gray-400 text-sm text-center py-2">공지가 없습니다</p>'; return; }
+    feed.innerHTML = '';
+    snap.forEach(d => {
+        const data = d.data();
+        const el = document.createElement('div');
+        el.className = 'p-3 bg-blue-50 rounded-xl';
+        el.innerHTML = `<p class="text-xs font-bold text-blue-700">${data.title}</p><p class="text-xs text-blue-600 mt-0.5">${data.body}</p>`;
+        feed.appendChild(el);
+    });
+});
+
+window.postNotice = async () => {
+    const title = document.getElementById('notice-title').value.trim();
+    const body = document.getElementById('notice-body').value.trim();
+    if (!title) return alert('제목을 입력하세요');
+    await addDoc(collection(db, 'usan_notices'), { title, body, createdAt: serverTimestamp() });
+    document.getElementById('notice-title').value = '';
+    document.getElementById('notice-body').value = '';
+    closeModal('noticeModal');
+};
+
+// ══════════════════════════════
+// 합주 투표 시스템
+// ══════════════════════════════
+let currentVoteId = null;
+let myVotes = [];
+
+onSnapshot(collection(db, 'usan_vote'), snap => {
+    if (snap.empty) { renderNoVote(); return; }
+    const voteDoc = snap.docs[0];
+    currentVoteId = voteDoc.id;
+    renderVote(voteDoc.id, voteDoc.data());
+});
+
+function renderNoVote() {
+    document.getElementById('vote-options').innerHTML = '<p class="text-gray-400 text-sm text-center py-4">진행 중인 투표가 없습니다</p>';
+    document.getElementById('vote-status-badge').textContent = '대기 중';
+    document.getElementById('submit-vote-btn').classList.add('hidden');
+    document.getElementById('confirm-vote-btn').classList.add('hidden');
+    document.getElementById('confirmed-schedule').classList.add('hidden');
+}
+
+function renderVote(voteId, data) {
+    if (data.confirmed) {
+        document.getElementById('confirmed-schedule').classList.remove('hidden');
+        document.getElementById('confirmed-date-text').textContent = data.confirmedDate;
+        renderDday(data.confirmedDate);
+        document.getElementById('vote-options').innerHTML = '<p class="text-green-600 text-sm text-center py-2">✅ 합주일이 확정되었습니다!</p>';
+        document.getElementById('vote-status-badge').textContent = '확정 완료';
+        document.getElementById('submit-vote-btn').classList.add('hidden');
+        document.getElementById('confirm-vote-btn').classList.add('hidden');
+        return;
+    }
+
+    const options = data.options || [];
+    const votes = data.votes || {};
+    const totalMembers = data.totalMembers || 5;
+    document.getElementById('vote-status-badge').textContent = `투표 중 · ${data.deadline || ''}`;
+
+    const container = document.getElementById('vote-options');
+    container.innerHTML = '';
+    options.forEach((opt, i) => {
+        const voterList = votes[i] || [];
+        const count = voterList.length;
+        const pct = Math.round((count / totalMembers) * 100);
+        const isMyVote = voterList.includes(myPart);
+        const div = document.createElement('div');
+        div.className = 'border rounded-xl p-3 cursor-pointer transition-all ' + (isMyVote ? 'border-blue-400 bg-blue-50' : 'border-gray-200');
+        div.innerHTML = `
+            <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="vote-cb-${i}" ${isMyVote?'checked':''} onchange="toggleVote(${i})" class="rounded">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">${opt.date}</p>
+                        <p class="text-xs text-gray-500">${opt.time}</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-blue-600">${count}명</span>
+            </div>
+            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div class="vote-bar h-full bg-blue-400 rounded-full" style="width:${pct}%"></div>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">${voterList.join(', ') || '없음'}</p>
+        `;
+        container.appendChild(div);
+    });
+    document.getElementById('submit-vote-btn').classList.remove('hidden');
+}
+
+window.toggleVote = (idx) => {
+    if (myVotes.includes(idx)) myVotes = myVotes.filter(v => v !== idx);
+    else myVotes.push(idx);
+};
+
+document.getElementById('submit-vote-btn').addEventListener('click', async () => {
+    if (!currentVoteId) return;
+    const voteRef = doc(db, 'usan_vote', currentVoteId);
+    const snap = await getDoc(voteRef);
+    const data = snap.data();
+    const votes = data.votes || {};
+    // 기존 투표에서 내 표 제거 후 재추가
+    Object.keys(votes).forEach(k => {
+        votes[k] = (votes[k] || []).filter(p => p !== myPart);
+    });
+    myVotes.forEach(idx => {
+        if (!votes[idx]) votes[idx] = [];
+        votes[idx].push(myPart);
+    });
+    await updateDoc(voteRef, { votes });
+    alert('투표 완료!');
+    myVotes = [];
+});
+
+document.getElementById('confirm-vote-btn').addEventListener('click', async () => {
+    if (!currentVoteId) return;
+    const snap = await getDoc(doc(db, 'usan_vote', currentVoteId));
+    const data = snap.data();
+    const options = data.options || [];
+    const votes = data.votes || {};
+    let bestIdx = 0, bestCount = 0;
+    options.forEach((_, i) => { const c = (votes[i] || []).length; if (c > bestCount) { bestCount = c; bestIdx = i; } });
+    const confirmed = `${options[bestIdx].date} ${options[bestIdx].time}`;
+    if (!confirm(`"${confirmed}"으로 합주일을 확정할까요?`)) return;
+    await updateDoc(doc(db, 'usan_vote', currentVoteId), { confirmed: true, confirmedDate: confirmed });
+});
+
+window.createVote = async () => {
+    const dateInputs = document.querySelectorAll('.vote-date-input');
+    const timeInputs = document.querySelectorAll('.vote-time-input');
+    const deadline = document.getElementById('vote-deadline').value;
+    const options = [];
+    dateInputs.forEach((d, i) => {
+        if (d.value) options.push({ date: d.value, time: timeInputs[i]?.value || '14:00' });
+    });
+    if (options.length < 1) return alert('날짜를 입력하세요');
+    // 기존 투표 삭제 후 새 투표 생성
+    const existing = await new Promise(res => {
+        const unsub = onSnapshot(collection(db, 'usan_vote'), snap => { unsub(); res(snap.docs); });
+    });
+    for (const d of existing) await deleteDoc(d.ref);
+    await addDoc(collection(db, 'usan_vote'), { options, deadline, votes: {}, confirmed: false, totalMembers: 5, createdAt: serverTimestamp() });
+    alert('투표가 시작되었습니다!');
+};
+
+window.addDateInput = () => {
+    const container = document.getElementById('date-inputs');
+    const div = document.createElement('div');
+    div.className = 'flex gap-2';
+    div.innerHTML = `<input type="date" class="vote-date-input flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm"><input type="time" class="vote-time-input w-28 px-3 py-2 border border-gray-200 rounded-xl text-sm" value="14:00">`;
+    container.appendChild(div);
+};
+
+function renderDday(dateStr) {
+    const card = document.getElementById('dday-content');
+    const parts = dateStr.split(' ');
+    const dateOnly = parts[0];
+    const timeOnly = parts.slice(1).join(' ');
+    const diff = Math.ceil((new Date(dateOnly) - new Date()) / 86400000);
+    const ddayText = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-Day!' : `D+${Math.abs(diff)}`;
+    card.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-lg font-bold text-gray-800">${dateOnly}</p>
+                <p class="text-sm text-gray-500">${timeOnly} · 홍대 스튜디오</p>
+            </div>
+            <div class="text-2xl font-bold text-blue-600">${ddayText}</div>
+        </div>`;
+}
+
+// ══════════════════════════════
+// 자료실
+// ══════════════════════════════
+let currentFolder = '';
+const folderNames = { scores: '악보', tracks: '파트별 음원', refs: '참고 자료' };
+
+window.openFolder = (folder) => {
+    currentFolder = folder;
+    document.getElementById('folder-list-view').classList.add('hidden');
+    document.getElementById('folder-detail-view').classList.remove('hidden');
+    document.getElementById('folder-title').textContent = folderNames[folder];
+    if (myRole === 'admin') document.getElementById('admin-upload-area').classList.remove('hidden');
+    loadFiles(folder);
+};
+
+window.closeFolder = () => {
+    document.getElementById('folder-list-view').classList.remove('hidden');
+    document.getElementById('folder-detail-view').classList.add('hidden');
+    currentFolder = '';
+};
+
+function loadFiles(folder) {
+    const container = document.getElementById('file-list-container');
+    container.innerHTML = '<p class="p-4 text-sm text-gray-400 text-center">로딩 중...</p>';
+    onSnapshot(collection(db, `usan_files_${folder}`), snap => {
+        if (snap.empty) { container.innerHTML = '<p class="p-4 text-sm text-gray-400 text-center">파일이 없습니다</p>'; return; }
+        container.innerHTML = '';
+        snap.forEach(d => {
+            const data = d.data();
+            const extColor = data.name?.endsWith('.mp3') ? 'bg-green-100 text-green-700' : data.name?.endsWith('.pdf') ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600';
+            const ext = data.name?.split('.').pop().toUpperCase() || 'FILE';
+            const row = document.createElement('div');
+            row.className = 'file-row flex items-center gap-3 px-4 py-3';
+            row.innerHTML = `
+                <span class="text-xs font-bold px-2 py-1 rounded-lg ${extColor} flex-none">${ext}</span>
+                <span class="text-sm text-gray-700 flex-1 truncate">${data.name}</span>
+                <span class="text-xs text-gray-400 flex-none">${data.size || ''}</span>
+                ${data.url ? `<a href="${data.url}" target="_blank" class="text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded-lg flex-none">받기</a>` : ''}
+                ${myRole==='admin' ? `<button onclick="deleteFile('usan_files_${folder}','${d.id}')" class="text-xs text-red-400 flex-none">삭제</button>` : ''}
+            `;
+            container.appendChild(row);
         });
+    });
+}
 
-        // 관리자 전용 렌더링
-        if (myRole === 'admin') {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+window.uploadFile = async () => {
+    const name = document.getElementById('upload-filename').value.trim();
+    const url = document.getElementById('upload-url').value.trim();
+    const size = document.getElementById('upload-size').value.trim();
+    if (!name) return alert('파일명을 입력하세요');
+    await addDoc(collection(db, `usan_files_${currentFolder}`), { name, url, size, uploadedAt: serverTimestamp() });
+    document.getElementById('upload-filename').value = '';
+    document.getElementById('upload-url').value = '';
+    document.getElementById('upload-size').value = '';
+    alert('업로드 완료!');
+};
 
-            onSnapshot(collection(db, "usan_band"), (snapshot) => {
-                const listEl = document.getElementById('memberList');
-                document.getElementById('memberCount').innerText = `${snapshot.size}명`;
-                listEl.innerHTML = '';
+window.deleteFile = async (col, id) => {
+    if (confirm('파일을 삭제할까요?')) await deleteDoc(doc(db, col, id));
+};
 
-                snapshot.forEach((mDoc) => {
-                    const data = mDoc.data();
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center p-3 bg-gray-50 rounded-xl text-sm";
-                    li.innerHTML = `
-                        <span class="font-bold text-gray-600">${data.part}</span>
-                        ${data.part !== 'LEADER' ? `<button onclick="removeMember('${mDoc.id}')" class="text-red-400 text-xs">제거</button>` : '<span class="text-blue-500 text-xs">Leader</span>'}
-                    `;
-                    listEl.appendChild(li);
-                });
-            });
-        }
+// ══════════════════════════════
+// 연습곡 관리
+// ══════════════════════════════
+const statusLabels = { candidate:'후보곡', practice:'연습중', done:'완료' };
+const statusColors = { candidate:'bg-blue-100 text-blue-700', practice:'bg-amber-100 text-amber-700', done:'bg-green-100 text-green-700' };
+const progressColors = { candidate:'bg-blue-400', practice:'bg-amber-400', done:'bg-green-500' };
 
-        // 전역 함수 등록 (삭제 버튼용)
-        window.removeMember = async (id) => {
-            if(confirm(`${id} 멤버를 삭제할까요?`)) {
-                await deleteDoc(doc(db, "usan_band", id));
-            }
-        };
-    </script>
+let allSongs = [];
+let currentFilter = 'all';
+
+onSnapshot(collection(db, 'usan_songs'), snap => {
+    allSongs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderSongs();
+    updateProgressSelect();
+});
+
+function renderSongs() {
+    const list = document.getElementById('song-list');
+    const filtered = currentFilter === 'all' ? allSongs : allSongs.filter(s => s.status === currentFilter);
+    if (filtered.length === 0) { list.innerHTML = '<p class="text-gray-400 text-sm text-center py-6">곡이 없습니다</p>'; return; }
+    list.innerHTML = '';
+    filtered.forEach(s => {
+        const progress = s.progress || {};
+        const parts = Object.keys(progress);
+        const avg = parts.length ? Math.round(parts.reduce((a,p) => a + (progress[p]||0), 0) / parts.length) : 0;
+        const myProg = progress[myPart] || 0;
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-4 shadow-sm space-y-2';
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-bold text-gray-800 text-sm">${s.title}</p>
+                    <p class="text-xs text-gray-400">${s.artist || ''}</p>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full font-bold ${statusColors[s.status]}">${statusLabels[s.status]}</span>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>팀 평균 진도</span><span>${avg}%</span>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="${progressColors[s.status]} h-full rounded-full vote-bar" style="width:${avg}%"></div>
+                </div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-400">
+                <span>내 진도 (${myPart})</span><span class="font-bold text-blue-600">${myProg}%</span>
+            </div>
+            ${myRole === 'admin' ? `<div class="flex gap-2 pt-1">
+                <select onchange="changeSongStatus('${s.id}', this.value)" class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1">
+                    <option value="candidate" ${s.status==='candidate'?'selected':''}>후보곡</option>
+                    <option value="practice" ${s.status==='practice'?'selected':''}>연습중</option>
+                    <option value="done" ${s.status==='done'?'selected':''}>완료</option>
+                </select>
+                <button onclick="deleteSong('${s.id}')" class="text-xs text-red-400 border border-red-200 rounded-lg px-2 py-1">삭제</button>
+            </div>` : ''}
+        `;
+        list.appendChild(card);
+    });
+}
+
+window.filterSongs = (status, btn) => {
+    currentFilter = status;
+    document.querySelectorAll('.song-filter-btn').forEach(b => { b.className = 'song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold'; });
+    btn.className = 'song-filter-btn flex-none px-3 py-1.5 bg-blue-600 text-white rounded-full text-xs font-bold';
+    renderSongs();
+};
+
+window.addSong = async () => {
+    const title = document.getElementById('song-title-input').value.trim();
+    const artist = document.getElementById('song-artist-input').value.trim();
+    const status = document.getElementById('song-status-input').value;
+    if (!title) return alert('곡 제목을 입력하세요');
+    await addDoc(collection(db, 'usan_songs'), { title, artist, status, progress: {}, createdAt: serverTimestamp() });
+    document.getElementById('song-title-input').value = '';
+    document.getElementById('song-artist-input').value = '';
+    closeModal('songModal');
+};
+
+window.changeSongStatus = async (id, status) => {
+    await updateDoc(doc(db, 'usan_songs', id), { status });
+};
+
+window.deleteSong = async (id) => {
+    if (confirm('곡을 삭제할까요?')) await deleteDoc(doc(db, 'usan_songs', id));
+};
+
+function updateProgressSelect() {
+    const sel = document.getElementById('progress-song-select');
+    sel.innerHTML = '<option value="">곡 선택...</option>';
+    allSongs.filter(s => s.status === 'practice').forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id; opt.textContent = s.title;
+        sel.appendChild(opt);
+    });
+}
+
+document.getElementById('progress-range').addEventListener('input', function() {
+    document.getElementById('progress-val').textContent = this.value + '%';
+});
+
+window.updateProgress = async () => {
+    const songId = document.getElementById('progress-song-select').value;
+    const val = parseInt(document.getElementById('progress-range').value);
+    if (!songId) return alert('곡을 선택하세요');
+    await updateDoc(doc(db, 'usan_songs', songId), { [`progress.${myPart}`]: val });
+    alert(`${myPart} 진도 ${val}% 저장!`);
+};
+
+// ══════════════════════════════
+// 멤버 관리 (리더)
+// ══════════════════════════════
+if (myRole === 'admin') {
+    onSnapshot(collection(db, 'usan_band'), snap => {
+        const list = document.getElementById('member-list-admin');
+        document.getElementById('member-count').textContent = `${snap.size}명`;
+        list.innerHTML = '';
+        snap.forEach(d => {
+            const data = d.data();
+            const li = document.createElement('li');
+            li.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-xl text-sm';
+            li.innerHTML = `<span class="font-bold text-gray-700">${data.part}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs ${data.role==='admin'?'text-blue-500':'text-gray-400'}">${data.role==='admin'?'리더':'멤버'}</span>
+                    ${data.part !== 'LEADER' ? `<button onclick="removeMember('${d.id}')" class="text-xs text-red-400">제거</button>` : ''}
+                </div>`;
+            list.appendChild(li);
+        });
+    });
+}
+
+window.removeMember = async (id) => {
+    if (confirm(`${id} 멤버를 삭제할까요?`)) await deleteDoc(doc(db, 'usan_band', id));
+};
+
+// ══════════════════════════════
+// 탭 / 모달 유틸
+// ══════════════════════════════
+window.openTab = (name) => {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const idx = ['home','schedule','files','songs','members'].indexOf(name);
+    if (idx >= 0) navBtns[idx]?.classList.add('active');
+    // 자료실 탭 이동 시 폴더뷰 초기화
+    if (name === 'files') { closeFolder(); }
+};
+
+window.openModal = (id) => document.getElementById(id).classList.add('open');
+window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+// 모달 바깥 클릭 닫기
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+</script>
 </body>
 </html>
