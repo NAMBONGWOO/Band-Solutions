@@ -3,163 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우산속밴드 - 대시보드</title>
+    <title>우산속밴드 - 입장</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
-        body { background-color: #f3f4f6; font-family: 'Noto Sans KR', sans-serif; }
-        .admin-only { display: none; } /* 기본적으로 관리자용은 숨김 */
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f3f4f6; }
+        .glass-morphism { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-md mx-auto space-y-6">
-        
-        <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm">
-            <div>
-                <h2 id="userPart" class="text-blue-600 font-bold text-sm">PART: 불러오는 중...</h2>
-                <h1 class="text-xl font-bold text-gray-800">우산속밴드 아지트</h1>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md glass-morphism rounded-3xl shadow-2xl p-8 space-y-8">
+        <div class="text-center">
+            <div class="inline-block p-4 bg-blue-500 rounded-full mb-4 shadow-lg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
             </div>
-            <button onclick="location.href='index.html'" class="text-gray-400 text-sm">로그아웃</button>
+            <h1 class="text-2xl font-bold text-gray-800">우산속밴드</h1>
+            <p class="text-gray-500 mt-2">멤버 전용 아지트</p>
         </div>
 
-        <div id="adminPanel" class="admin-only bg-blue-50 p-6 rounded-3xl border border-blue-100 space-y-4">
-            <h3 class="font-bold text-blue-800 text-sm">🌟 리더 전용 관리 도구</h3>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="createVote()" class="bg-blue-600 text-white p-3 rounded-2xl text-sm font-bold shadow-md">
-                    📅 투표 생성
-                </button>
-                <button class="bg-white text-blue-600 p-3 rounded-2xl text-sm font-bold border border-blue-200">
-                    👥 멤버 관리
-                </button>
+        <form id="entryForm" class="space-y-6">
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-600">초대 코드</label>
+                <input type="text" id="inviteCode" required placeholder="예: DRUM-1234" class="w-full px-5 py-4 bg-white border-0 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none transition-all uppercase">
             </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
-            <h3 class="font-bold text-gray-800">현재 진행 중인 일정</h3>
-            <div id="scheduleStatus" class="p-10 text-center border-2 border-dashed border-gray-100 rounded-2xl text-gray-400 text-sm">
-                등록된 합주 일정이 없습니다.<br>리더의 투표를 기다려주세요.
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-600">생년월일 (6자리)</label>
+                <input type="password" id="birthdate" required maxlength="6" inputmode="numeric" placeholder="YYMMDD" class="w-full px-5 py-4 bg-white border-0 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none transition-all">
             </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
-            <h3 class="font-bold text-gray-800">우리 밴드 연습곡</h3>
-            <ul class="space-y-3">
-                <li class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                    <span class="text-sm font-medium">곡 리스트를 준비 중입니다.</span>
-                </li>
-            </ul>
-        </div>
-
+            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg transform active:scale-95 transition-all">
+                우산속으로 들어가기
+            </button>
+        </form>
     </div>
 
-    <script>
-        // 1. 로컬스토리지에서 입장 정보 가져오기
-        const myPart = localStorage.getItem('myPart');
-        const myRole = localStorage.getItem('myRole');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        if (!myPart) {
-            alert("비정상적인 접근입니다. 다시 입장해주세요.");
-            location.href = 'index.html';
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
+            authDomain: "band-solutions.firebaseapp.com",
+            projectId: "band-solutions",
+            storageBucket: "band-solutions.firebasestorage.app",
+            messagingSenderId: "1094046119043",
+            appId: "1:1094046119043:web:e70814fad4cc0fea7097b6",
+            measurementId: "G-XH3YYL86JN"
+        };
 
-        // 2. UI 세팅
-        document.getElementById('userPart').innerText = `PART: ${myPart}`;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // 3. 관리자 권한 확인 후 패널 노출
-        if (myRole === 'admin') {
-            document.getElementById('adminPanel').style.display = 'block';
-        }
+        document.getElementById('entryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inviteCode = document.getElementById('inviteCode').value.toUpperCase();
+            const birthdate = document.getElementById('birthdate').value;
 
-        function createVote() {
-            alert("5월 일정 수집 투표를 생성합니다. (기능 구현 예정)");
-            // 여기서 투표 생성 로직으로 연결
-        }
-    </script>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
-        authDomain: "band-solutions.firebaseapp.com",
-        projectId: "band-solutions",
-        storageBucket: "band-solutions.firebasestorage.app",
-        messagingSenderId: "1094046119043",
-        appId: "1:1094046119043:web:e70814fad4cc0fea7097b6",
-        measurementId: "G-XH3YYL86JN"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    document.getElementById('entryForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const inviteCode = document.getElementById('inviteCode').value.toUpperCase();
-        const birthdate = document.getElementById('birthdate').value;
-
-        // 1. 관리자(MASTER) 체크
-        if (inviteCode === "MASTER-7777") {
-            try {
+            // 관리자 체크
+            if (inviteCode === "MASTER-7777") {
                 const adminRef = doc(db, "usan_band", "LEADER");
-                await setDoc(adminRef, {
-                    part: "LEADER",
-                    birth: birthdate,
-                    role: "admin", // 관리자 권한 부여
-                    joinedAt: new Date().toISOString()
-                });
-                alert("반갑습니다, 리더님! 관리자 모드로 입장합니다.");
+                await setDoc(adminRef, { part: "LEADER", birth: birthdate, role: "admin", joinedAt: new Date().toISOString() });
+                alert("반갑습니다, 리더님!");
                 enterDashboard("LEADER", "admin");
-                return; // 마스터 코드일 경우 여기서 종료
-            } catch (error) {
-                console.error("관리자 등록 오류:", error);
-                alert("관리자 등록 중 오류가 발생했습니다.");
                 return;
             }
-        }
 
-        // 2. 일반 멤버 체크 (기존 로직)
-        const part = inviteCode.split('-')[0]; 
-        if (!part || birthdate.length !== 6) {
-            alert("초대코드와 생일 6자리를 정확히 입력해주세요.");
-            return;
-        }
+            const part = inviteCode.split('-')[0];
+            if (!part || birthdate.length !== 6) { alert("코드와 생일을 확인해주세요."); return; }
 
-        try {
             const memberRef = doc(db, "usan_band", part);
             const docSnap = await getDoc(memberRef);
 
             if (docSnap.exists()) {
                 if (docSnap.data().birth === birthdate) {
-                    alert(`${part} 세션님, 환영합니다!`);
                     enterDashboard(part, docSnap.data().role || "member");
                 } else {
-                    alert("이미 등록된 파트입니다. 정보를 확인해주세요.");
+                    alert("이미 등록된 파트입니다.");
                 }
             } else {
-                await setDoc(memberRef, {
-                    part: part,
-                    birth: birthdate,
-                    role: "member",
-                    joinedAt: new Date().toISOString()
-                });
-                alert(`우산속밴드 ${part} 세션으로 등록되었습니다!`);
+                await setDoc(memberRef, { part, birth: birthdate, role: "member", joinedAt: new Date().toISOString() });
+                alert(`${part} 세션으로 가입되었습니다!`);
                 enterDashboard(part, "member");
             }
-        } catch (error) {
-            console.error("오류 발생:", error);
-            alert("Firebase 설정이나 권한을 확인해주세요.");
-        }
-    });
+        });
 
-    function enterDashboard(part, role) {
-        // 세션 정보와 권한을 로컬스토리지에 저장하여 다음 페이지에서 활용
-        localStorage.setItem('myPart', part);
-        localStorage.setItem('myRole', role);
-        
-        // 대시보드 파일이 아직 없으므로 콘솔로그로 확인 후 나중에 주석 해제
-        console.log(`입장 완료 - 파트: ${part}, 권한: ${role}`);
-        // window.location.href = 'dashboard.html'; 
-    }
-</script>
+        function enterDashboard(part, role) {
+            localStorage.setItem('myPart', part);
+            localStorage.setItem('myRole', role);
+            window.location.href = 'dashboard.html';
+        }
+    </script>
 </body>
 </html>
