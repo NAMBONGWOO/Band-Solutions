@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우산속밴드 - 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Noto Sans KR', sans-serif; }
+        .admin-only { display: none; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto space-y-6 pb-10">
+        
+        <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm">
+            <div>
+                <h2 id="userPart" class="text-blue-600 font-bold text-xs uppercase">PART</h2>
+                <h1 class="text-xl font-bold text-gray-800">우산속밴드 아지트</h1>
+            </div>
+            <button id="logoutBtn" class="text-gray-400 text-sm font-medium">로그아웃</button>
+        </div>
+
+        <div id="adminPanel" class="admin-only bg-blue-600 p-6 rounded-3xl shadow-xl space-y-4">
+            <h3 class="font-bold text-blue-100 text-sm">🌟 리더 전용 관리 도구</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="bg-white text-blue-600 p-3 rounded-2xl text-sm font-bold shadow-sm">📅 투표 생성</button>
+                <button class="bg-blue-500 text-white p-3 rounded-2xl text-sm font-bold border border-blue-400">📝 공지 작성</button>
+            </div>
+        </div>
+
+        <div id="memberManagement" class="admin-only bg-white p-6 rounded-3xl shadow-sm space-y-4">
+            <h3 class="font-bold text-gray-800 flex justify-between">
+                👥 멤버 현황 <span id="memberCount" class="text-blue-500 text-xs font-normal">0명</span>
+            </h3>
+            <ul id="memberList" class="space-y-2"></ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
+            <h3 class="font-bold text-gray-800">합주 일정</h3>
+            <div id="scheduleStatus" class="p-10 text-center border-2 border-dashed border-gray-100 rounded-2xl text-gray-400 text-sm">
+                현재 진행 중인 투표가 없습니다.
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
+            <h3 class="font-bold text-gray-800">연습곡 자료실</h3>
+            <div class="text-center p-6 text-gray-400 text-sm">곡 정보가 없습니다.</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
+            authDomain: "band-solutions.firebaseapp.com",
+            projectId: "band-solutions",
+            storageBucket: "band-solutions.firebasestorage.app",
+            messagingSenderId: "1094046119043",
+            appId: "1:1094046119043:web:e70814fad4cc0fea7097b6",
+            measurementId: "G-XH3YYL86JN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const myPart = localStorage.getItem('myPart');
+        const myRole = localStorage.getItem('myRole');
+
+        if (!myPart) { location.href = 'index.html'; }
+        document.getElementById('userPart').innerText = `PART: ${myPart}`;
+
+        // 로그아웃 로직
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if(confirm("로그아웃 하시겠습니까?")) {
+                localStorage.clear();
+                location.href = 'index.html';
+            }
+        });
+
+        // 관리자 전용 렌더링
+        if (myRole === 'admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+
+            onSnapshot(collection(db, "usan_band"), (snapshot) => {
+                const listEl = document.getElementById('memberList');
+                document.getElementById('memberCount').innerText = `${snapshot.size}명`;
+                listEl.innerHTML = '';
+
+                snapshot.forEach((mDoc) => {
+                    const data = mDoc.data();
+                    const li = document.createElement('li');
+                    li.className = "flex justify-between items-center p-3 bg-gray-50 rounded-xl text-sm";
+                    li.innerHTML = `
+                        <span class="font-bold text-gray-600">${data.part}</span>
+                        ${data.part !== 'LEADER' ? `<button onclick="removeMember('${mDoc.id}')" class="text-red-400 text-xs">제거</button>` : '<span class="text-blue-500 text-xs">Leader</span>'}
+                    `;
+                    listEl.appendChild(li);
+                });
+            });
+        }
+
+        // 전역 함수 등록 (삭제 버튼용)
+        window.removeMember = async (id) => {
+            if(confirm(`${id} 멤버를 삭제할까요?`)) {
+                await deleteDoc(doc(db, "usan_band", id));
+            }
+        };
+    </script>
+</body>
+</html>
