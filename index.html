@@ -44,6 +44,13 @@
         <p class="text-center text-slate-600 text-xs">초대코드는 밴드 리더에게 문의하세요</p>
     </div>
 
+    <!-- 관리자 진입: 우하단 고정 열쇠 아이콘 -->
+    <a href="admin.html"
+       style="position:fixed;bottom:1.25rem;right:1.25rem;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#1e293b;text-decoration:none;opacity:.3;transition:opacity .2s;"
+       onmouseover="this.style.opacity='0.65'"
+       onmouseout="this.style.opacity='0.3'"
+       title="시스템 관리자">🔐</a>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, doc, query, where, getDocs, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";

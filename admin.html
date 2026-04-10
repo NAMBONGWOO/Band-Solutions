@@ -6,174 +6,320 @@
     <title>우산속밴드 - 시스템 관리자</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 1.25rem; }
-        input, select { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; border-radius: .75rem; padding: .6rem 1rem; width: 100%; font-size: .875rem; outline: none; }
-        input:focus, select:focus { border-color: #3b82f6; }
-        input::placeholder { color: #475569; }
-        label { font-size: .75rem; color: #94a3b8; display: block; margin-bottom: .3rem; }
-        .btn-primary { background: #2563eb; color: white; font-weight: 700; padding: .65rem 1rem; border-radius: .75rem; width: 100%; font-size: .875rem; cursor: pointer; transition: background .15s; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 1.25rem; margin-bottom: 1rem; }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+        input, select, textarea {
+            background: #0f172a; border: 1px solid #334155; color: #e2e8f0;
+            border-radius: .75rem; padding: .6rem 1rem; width: 100%;
+            font-size: .875rem; outline: none; font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #3b82f6; }
+        input::placeholder, textarea::placeholder { color: #475569; }
+        label { font-size: .75rem; color: #94a3b8; display: block; margin-bottom: .35rem; }
+        .field { margin-bottom: .85rem; }
+        .btn { padding: .65rem 1rem; border-radius: .75rem; font-size: .875rem; font-weight: 700; cursor: pointer; transition: all .15s; border: none; width: 100%; }
+        .btn-primary { background: #2563eb; color: #fff; }
         .btn-primary:hover { background: #1d4ed8; }
-        .btn-danger { background: #7f1d1d; color: #fca5a5; font-weight: 600; padding: .4rem .75rem; border-radius: .5rem; font-size: .75rem; cursor: pointer; }
-        .btn-ghost { background: transparent; border: 1px solid #334155; color: #94a3b8; font-weight: 600; padding: .65rem 1rem; border-radius: .75rem; width: 100%; font-size: .875rem; cursor: pointer; }
-        .tag-admin { background: #1e3a8a; color: #93c5fd; }
-        .tag-leader { background: #14532d; color: #86efac; }
-        .tag-member { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
-        .badge { font-size: .65rem; font-weight: 700; padding: .2rem .6rem; border-radius: 99px; }
+        .btn-success { background: #15803d; color: #fff; }
+        .btn-success:hover { background: #166534; }
+        .btn-danger { background: #7f1d1d; color: #fca5a5; }
+        .btn-ghost { background: transparent; border: 1px solid #334155; color: #94a3b8; }
+        .btn-sm { padding: .3rem .75rem; font-size: .75rem; border-radius: .5rem; font-weight: 600; cursor: pointer; border: none; }
+        .badge { font-size: .65rem; font-weight: 700; padding: .18rem .55rem; border-radius: 99px; }
+        .badge-leader { background: #14532d; color: #86efac; }
+        .badge-member { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+        .badge-used { background: #374151; color: #9ca3af; }
+        .badge-fresh { background: #14532d; color: #86efac; }
+
+        /* 악기 선택 버튼 */
+        .instrument-btn {
+            background: #0f172a; border: 1px solid #334155; color: #94a3b8;
+            border-radius: .65rem; padding: .5rem .75rem; font-size: .8rem;
+            font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap;
+        }
+        .instrument-btn.selected {
+            background: #1e3a8a; border-color: #3b82f6; color: #93c5fd;
+        }
+        .instrument-btn:hover:not(.selected) { border-color: #475569; color: #cbd5e1; }
+
+        /* 생성된 초대코드 카드 */
+        .invite-code-card {
+            background: #0f172a; border: 1px solid #1e40af;
+            border-radius: .75rem; padding: .75rem 1rem;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: .5rem;
+        }
+        .code-text { font-family: monospace; font-size: .95rem; color: #60a5fa; font-weight: 700; letter-spacing: .05em; }
+        .code-part { font-size: .7rem; color: #64748b; margin-top: .1rem; }
+
+        /* 멤버 리스트 */
+        .member-row {
+            background: #0f172a; border-radius: .65rem; padding: .6rem .85rem;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: .4rem;
+        }
+
+        /* 탭 네비 */
+        .tab-nav-btn { flex: 1; padding: .5rem .25rem; font-size: .75rem; font-weight: 700; border-radius: .5rem; color: #64748b; cursor: pointer; border: none; background: transparent; transition: all .15s; }
+        .tab-nav-btn.active { background: #2563eb; color: #fff; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .toast { position: fixed; top: 1.25rem; left: 50%; transform: translateX(-50%); padding: .6rem 1.25rem; border-radius: .75rem; font-size: .8rem; font-weight: 700; z-index: 999; white-space: nowrap; pointer-events: none; }
     </style>
 </head>
-<body class="min-h-screen pb-8">
+<body class="min-h-screen pb-10">
 
-<!-- ── 로그인 화면 ── -->
-<div id="login-screen" class="flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-sm space-y-6">
+<!-- ════════════════════════════════
+     로그인 화면
+════════════════════════════════ -->
+<div id="login-screen" class="flex items-center justify-center min-h-screen p-5">
+    <div class="w-full max-w-xs space-y-5">
         <div class="text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 text-3xl">🔐</div>
-            <h1 class="text-xl font-bold text-white">시스템 관리자</h1>
-            <p class="text-slate-400 text-sm mt-1">우산속밴드 앱 관리자 전용</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-3 text-3xl" style="background:#1e293b;border:1px solid #334155">🔐</div>
+            <h1 class="text-lg font-bold text-white">시스템 관리자</h1>
+            <p class="text-slate-500 text-xs mt-1">우산속밴드 앱 전용</p>
         </div>
-        <div class="card space-y-4">
-            <div>
+        <div class="card space-y-3">
+            <div class="field">
                 <label>관리자 ID</label>
-                <input type="text" id="admin-id-input" placeholder="관리자 ID 입력">
+                <input type="text" id="admin-id-input" placeholder="admin">
             </div>
-            <div>
-                <label>관리자 비밀번호</label>
-                <input type="password" id="admin-pw-input" placeholder="비밀번호 입력">
+            <div class="field">
+                <label>비밀번호</label>
+                <input type="password" id="admin-pw-input" placeholder="••••••••">
             </div>
-            <button onclick="adminLogin()" class="btn-primary">관리자 로그인</button>
+            <button onclick="adminLogin()" class="btn btn-primary">로그인</button>
         </div>
-        <p class="text-center text-slate-600 text-xs">
-            일반 멤버 입장은 <a href="index.html" class="text-blue-400 underline">여기</a>
+        <p class="text-center text-slate-700 text-xs">
+            일반 멤버 입장 → <a href="index.html" class="text-blue-500 underline">index.html</a>
         </p>
     </div>
 </div>
 
-<!-- ── 관리자 대시보드 ── -->
-<div id="admin-dashboard" class="hidden max-w-md mx-auto p-4 space-y-5 pt-6">
+<!-- ════════════════════════════════
+     관리자 대시보드
+════════════════════════════════ -->
+<div id="admin-dash" class="hidden max-w-md mx-auto p-4 pt-5">
 
     <!-- 헤더 -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mb-4">
         <div>
-            <p class="text-xs text-blue-400 font-bold">SYSTEM ADMIN</p>
-            <h1 class="text-lg font-bold text-white">우산속밴드 관리</h1>
+            <p class="text-xs text-blue-400 font-bold tracking-widest">SYSTEM ADMIN</p>
+            <h1 class="text-base font-bold text-white leading-tight">우산속밴드 관리 콘솔</h1>
         </div>
-        <button onclick="adminLogout()" class="text-xs text-slate-400 border border-slate-700 px-3 py-1.5 rounded-xl">로그아웃</button>
+        <button onclick="adminLogout()" class="text-xs text-slate-500 border border-slate-700 px-3 py-1.5 rounded-xl">로그아웃</button>
     </div>
 
-    <!-- 탭 -->
-    <div class="flex gap-2 bg-slate-800 p-1 rounded-xl">
-        <button onclick="switchTab('members')" id="tab-btn-members" class="flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white">멤버 관리</button>
-        <button onclick="switchTab('invites')" id="tab-btn-invites" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400">초대코드</button>
-        <button onclick="switchTab('settings')" id="tab-btn-settings" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400">앱 설정</button>
+    <!-- 탭 네비 -->
+    <div class="flex gap-1 bg-slate-800 p-1 rounded-xl mb-5">
+        <button onclick="switchTab('band')"    id="tn-band"    class="tab-nav-btn active">🎸 밴드 설정</button>
+        <button onclick="switchTab('invites')" id="tn-invites" class="tab-nav-btn">📨 초대코드</button>
+        <button onclick="switchTab('members')" id="tn-members" class="tab-nav-btn">👥 멤버</button>
+        <button onclick="switchTab('system')"  id="tn-system"  class="tab-nav-btn">⚙️ 시스템</button>
     </div>
 
-    <!-- ① 멤버 관리 탭 -->
-    <div id="tab-members" class="section active space-y-4">
-        <div class="card space-y-3">
-            <div class="flex justify-between items-center">
-                <p class="text-sm font-bold text-white">전체 멤버</p>
-                <span id="total-count" class="badge tag-member">0명</span>
+    <!-- ──────────────────────────────
+         탭 ① 밴드 설정
+    ────────────────────────────── -->
+    <div id="tab-band" class="tab-section active">
+
+        <!-- 밴드 기본 정보 -->
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-3">🎵 밴드 기본 정보</p>
+            <div class="field">
+                <label>밴드명</label>
+                <input type="text" id="band-name" placeholder="예: 우산속밴드">
             </div>
-            <ul id="member-list" class="space-y-2"></ul>
+            <div class="field">
+                <label>지역</label>
+                <select id="band-region">
+                    <option value="SE">서울 (SE)</option>
+                    <option value="BS">부산 (BS)</option>
+                    <option value="DG">대구 (DG)</option>
+                    <option value="IC">인천 (IC)</option>
+                    <option value="GJ">광주 (GJ)</option>
+                    <option value="DJ">대전 (DJ)</option>
+                    <option value="US">울산 (US)</option>
+                    <option value="ETC">기타 (ETC)</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>합주실 이름</label>
+                <input type="text" id="studio-name" placeholder="예: 홍대 스튜디오 A">
+            </div>
+            <div class="field">
+                <label>합주실 주소</label>
+                <input type="text" id="studio-addr" placeholder="예: 서울 마포구 ...">
+            </div>
+
+            <!-- 밴드 고유코드 표시 -->
+            <div style="background:#0f172a;border:1px solid #1e40af;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.85rem;">
+                <p class="text-xs text-slate-500 mb-1">밴드 고유코드 <span class="text-blue-400">(자동 생성)</span></p>
+                <p id="band-code-display" class="font-mono text-blue-400 font-bold text-lg tracking-widest">—</p>
+                <p class="text-xs text-slate-600 mt-1">지역코드 + 생성연월 + 4자리 난수</p>
+            </div>
+
+            <button onclick="saveBandInfo()" class="btn btn-primary">밴드 정보 저장 / 코드 생성</button>
         </div>
 
-        <!-- 리더 지정 -->
-        <div class="card space-y-3">
-            <p class="text-sm font-bold text-white">🎸 밴드 리더 지정</p>
-            <p class="text-xs text-slate-400">가입된 멤버 중 리더를 지정합니다. 리더는 공지·투표·곡 관리 권한을 가집니다.</p>
-            <div>
-                <label>리더로 지정할 멤버 파트</label>
+        <!-- 악기 구성 멤버 설정 -->
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-1">🎹 악기 구성 설정</p>
+            <p class="text-xs text-slate-500 mb-3">버튼을 눌러 멤버 파트를 추가하세요. 같은 악기를 여러 번 누르면 2번, 3번 파트가 생성됩니다.</p>
+
+            <!-- 기본 악기 버튼 -->
+            <div class="flex flex-wrap gap-2 mb-3">
+                <button class="instrument-btn" onclick="addInstrument('VOCAL')">🎤 보컬</button>
+                <button class="instrument-btn" onclick="addInstrument('GUITAR')">🎸 기타</button>
+                <button class="instrument-btn" onclick="addInstrument('BASS')">🎸 베이스</button>
+                <button class="instrument-btn" onclick="addInstrument('DRUM')">🥁 드럼</button>
+                <button class="instrument-btn" onclick="addInstrument('KEY')">🎹 키보드</button>
+                <button class="instrument-btn" onclick="addInstrument('PIANO')">🎹 피아노</button>
+                <button class="instrument-btn" onclick="addInstrument('VIOLIN')">🎻 바이올린</button>
+                <button class="instrument-btn" onclick="addInstrument('SAX')">🎷 색소폰</button>
+                <button class="instrument-btn" onclick="addInstrument('TRUMPET')">🎺 트럼펫</button>
+                <button class="instrument-btn" onclick="addInstrument('HARMONICA')">🪗 하모니카</button>
+            </div>
+
+            <!-- 직접 입력 -->
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="custom-instrument" placeholder="특수 악기 직접 입력 (영문)" style="border-radius:.65rem;padding:.45rem .85rem;font-size:.8rem;">
+                <button onclick="addCustomInstrument()" style="background:#1e3a8a;color:#93c5fd;border:1px solid #3b82f6;border-radius:.65rem;padding:.45rem .85rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
+            </div>
+
+            <!-- 선택된 파트 목록 -->
+            <div class="mb-3">
+                <p class="text-xs text-slate-500 mb-2">구성된 파트 <span id="part-count" class="text-blue-400">0명</span></p>
+                <div id="selected-parts" class="space-y-1.5"></div>
+                <p id="no-parts-msg" class="text-xs text-slate-600 text-center py-3">악기를 선택해주세요</p>
+            </div>
+
+            <button onclick="saveInstruments()" class="btn btn-success">악기 구성 저장</button>
+        </div>
+    </div>
+
+    <!-- ──────────────────────────────
+         탭 ② 초대코드
+    ────────────────────────────── -->
+    <div id="tab-invites" class="tab-section">
+
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-1">📨 초대코드 일괄 생성</p>
+            <p class="text-xs text-slate-500 mb-3">저장된 악기 구성을 기반으로 파트별 초대코드를 자동 생성합니다.</p>
+            <div id="invite-gen-info" class="mb-3" style="background:#0f172a;border:1px solid #334155;border-radius:.75rem;padding:.75rem 1rem;">
+                <p class="text-xs text-slate-500">현재 밴드코드</p>
+                <p id="invite-band-code" class="font-mono text-blue-400 font-bold">—</p>
+                <p class="text-xs text-slate-500 mt-1.5">구성 파트</p>
+                <p id="invite-parts-preview" class="text-xs text-slate-300">—</p>
+            </div>
+            <button onclick="generateAllInvites()" class="btn btn-primary mb-2">⚡ 파트별 초대코드 일괄 생성</button>
+            <button onclick="generateSingleInvite()" class="btn btn-ghost">단일 파트 코드 추가 생성 ▾</button>
+            <!-- 단일 생성 패널 -->
+            <div id="single-invite-panel" class="hidden mt-3 space-y-2">
+                <select id="single-part-select" style="font-size:.8rem;padding:.45rem .85rem;">
+                    <option value="">파트 선택...</option>
+                </select>
+                <button onclick="doSingleInvite()" class="btn btn-primary" style="font-size:.8rem;padding:.5rem 1rem;">생성</button>
+            </div>
+        </div>
+
+        <!-- 생성된 코드 목록 -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-bold text-white">발급된 초대코드</p>
+                <button onclick="copyAllCodes()" class="btn-sm" style="background:#1e3a8a;color:#93c5fd;border:1px solid #1e40af;">전체 복사</button>
+            </div>
+            <div id="invite-list" class="space-y-1">
+                <p class="text-xs text-slate-600 text-center py-3">생성된 코드가 없습니다</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ──────────────────────────────
+         탭 ③ 멤버 관리
+    ────────────────────────────── -->
+    <div id="tab-members" class="tab-section">
+        <div class="card">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-bold text-white">전체 멤버</p>
+                <span id="member-count" class="text-xs text-blue-400 font-bold">0명</span>
+            </div>
+            <div id="member-list" class="space-y-1">
+                <p class="text-xs text-slate-600 text-center py-3">가입된 멤버가 없습니다</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-2">🎸 밴드 리더 지정</p>
+            <p class="text-xs text-slate-500 mb-3">지정된 멤버는 공지·투표·곡 추가 등 밴드 운영 권한을 갖습니다.</p>
+            <div class="field">
+                <label>리더로 지정할 멤버</label>
                 <select id="leader-select">
                     <option value="">-- 멤버 선택 --</option>
                 </select>
             </div>
-            <button onclick="setLeader()" class="btn-primary">리더로 지정하기</button>
+            <button onclick="setLeader()" class="btn btn-success">리더로 지정</button>
         </div>
     </div>
 
-    <!-- ② 초대코드 탭 -->
-    <div id="tab-invites" class="section space-y-4">
-        <div class="card space-y-3">
-            <p class="text-sm font-bold text-white">📨 초대코드 발급</p>
-            <p class="text-xs text-slate-400">멤버에게 전달할 초대코드를 만듭니다. 코드 형식: <span class="text-blue-400 font-mono">파트명-숫자4자리</span></p>
-            <div>
-                <label>파트명</label>
-                <input type="text" id="invite-part" placeholder="예: VOCAL, GUITAR, BASS, DRUM, KEY" class="uppercase">
-            </div>
-            <div>
-                <label>코드 번호 (4자리)</label>
-                <input type="text" id="invite-num" placeholder="예: 1234" maxlength="4" inputmode="numeric">
-            </div>
-            <button onclick="generateInvite()" class="btn-primary">코드 생성</button>
-            <div id="invite-result" class="hidden bg-slate-900 rounded-xl p-4 text-center">
-                <p class="text-xs text-slate-400 mb-1">생성된 초대코드</p>
-                <p id="invite-code-display" class="text-2xl font-mono font-bold text-blue-400 tracking-widest"></p>
-                <p class="text-xs text-slate-500 mt-2">이 코드와 생년월일(YYMMDD)을 멤버에게 전달하세요</p>
-                <button onclick="copyInvite()" class="mt-3 text-xs text-blue-400 border border-blue-800 px-4 py-1.5 rounded-lg">코드 복사</button>
-            </div>
-        </div>
-
-        <!-- 발급된 코드 목록 -->
-        <div class="card space-y-3">
-            <p class="text-sm font-bold text-white">발급된 초대코드 목록</p>
-            <ul id="invite-list" class="space-y-2 text-sm text-slate-400">
-                <li class="text-center py-2 text-xs">발급된 코드가 없습니다</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- ③ 앱 설정 탭 -->
-    <div id="tab-settings" class="section space-y-4">
-        <div class="card space-y-3">
-            <p class="text-sm font-bold text-white">🏠 합주실 설정</p>
-            <div>
-                <label>합주실 이름</label>
-                <input type="text" id="studio-name" placeholder="예: 홍대 스튜디오 A">
-            </div>
-            <div>
-                <label>주소</label>
-                <input type="text" id="studio-addr" placeholder="예: 서울 마포구 ...">
-            </div>
-            <button onclick="saveStudio()" class="btn-primary">저장</button>
-        </div>
-
-        <div class="card space-y-3">
-            <p class="text-sm font-bold text-white">🔐 관리자 비밀번호 변경</p>
-            <div>
-                <label>새 비밀번호</label>
+    <!-- ──────────────────────────────
+         탭 ④ 시스템 설정
+    ────────────────────────────── -->
+    <div id="tab-system" class="tab-section">
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-3">🔐 관리자 비밀번호 변경</p>
+            <div class="field">
+                <label>새 비밀번호 (6자 이상)</label>
                 <input type="password" id="new-pw" placeholder="새 비밀번호">
             </div>
-            <div>
-                <label>확인</label>
-                <input type="password" id="new-pw-confirm" placeholder="비밀번호 확인">
+            <div class="field">
+                <label>비밀번호 확인</label>
+                <input type="password" id="new-pw-confirm" placeholder="다시 입력">
             </div>
-            <button onclick="changePw()" class="btn-primary">변경</button>
+            <button onclick="changePw()" class="btn btn-primary">변경</button>
         </div>
 
-        <div class="card space-y-3">
-            <p class="text-sm font-bold text-white">🗑️ 데이터 초기화</p>
-            <p class="text-xs text-slate-400">주의: 선택한 데이터를 Firebase에서 영구 삭제합니다.</p>
-            <button onclick="clearData('usan_notices')" class="btn-danger w-full py-2 rounded-lg">공지 전체 삭제</button>
-            <button onclick="clearData('usan_vote')" class="btn-danger w-full py-2 rounded-lg mt-2">투표 데이터 초기화</button>
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-2">🗑️ 데이터 초기화</p>
+            <p class="text-xs text-slate-500 mb-3">선택한 데이터를 Firebase에서 영구 삭제합니다. 되돌릴 수 없습니다.</p>
+            <div class="space-y-2">
+                <button onclick="clearCol('usan_notices')" class="btn btn-danger">공지 전체 삭제</button>
+                <button onclick="clearCol('usan_vote')" class="btn btn-danger" style="margin-top:.5rem">투표 데이터 초기화</button>
+                <button onclick="clearCol('usan_invites')" class="btn btn-danger" style="margin-top:.5rem">초대코드 전체 삭제</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <p class="text-sm font-bold text-white mb-2">ℹ️ 초대코드 구조 안내</p>
+            <div style="background:#0f172a;border-radius:.65rem;padding:.85rem;font-size:.75rem;line-height:1.8;color:#64748b;">
+                <p class="text-slate-300 font-mono font-bold mb-1">SE2604-K7M2-GUITAR-X3F8</p>
+                <p><span class="text-blue-400">SE</span> = 지역코드 (서울)</p>
+                <p><span class="text-blue-400">2604</span> = 생성 연월 (2026년 04월)</p>
+                <p><span class="text-blue-400">K7M2</span> = 밴드 난수 (충돌 방지)</p>
+                <p><span class="text-blue-400">GUITAR</span> = 악기/파트</p>
+                <p><span class="text-blue-400">X3F8</span> = 멤버 개인 난수</p>
+            </div>
         </div>
     </div>
 
-</div><!-- end admin-dashboard -->
+</div><!-- end admin-dash -->
 
+<!-- ════════════════════════════════
+     Firebase + 앱 로직
+════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getFirestore, collection, doc,
-    onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, getDocs,
-    getDoc, query, orderBy, serverTimestamp
+    onSnapshot, addDoc, setDoc, updateDoc, deleteDoc,
+    getDocs, getDoc, query, orderBy, serverTimestamp, where
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const firebaseConfig = {
+const FC = {
     apiKey: "AIzaSyDNPl9n3gt-ZJqZHKFzSl5PufLOCgG7kI4",
     authDomain: "band-solutions.firebaseapp.com",
     projectId: "band-solutions",
@@ -181,232 +327,406 @@ const firebaseConfig = {
     messagingSenderId: "1094046119043",
     appId: "1:1094046119043:web:e70814fad4cc0fea7097b6"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = initializeApp(FC);
+const db  = getFirestore(app);
 
-// ══════════════════════════════
-// 관리자 로그인
-// 초기 기본값: ID=admin / PW=woosanband2024
-// Firebase usan_system/admin_credentials 에 저장·관리
-// ══════════════════════════════
 const DEFAULT_ID = 'admin';
 const DEFAULT_PW = 'woosanband2024';
 
+// ══════════════════════════════
+// 로그인 / 세션
+// ══════════════════════════════
 window.adminLogin = async () => {
     const id = document.getElementById('admin-id-input').value.trim();
     const pw = document.getElementById('admin-pw-input').value;
-
-    // Firebase에 저장된 크레덴셜 확인 (없으면 기본값 사용)
     const credRef = doc(db, 'usan_system', 'admin_credentials');
     const credSnap = await getDoc(credRef);
-    let validId = DEFAULT_ID;
-    let validPw = DEFAULT_PW;
-    if (credSnap.exists()) {
-        validId = credSnap.data().id || DEFAULT_ID;
-        validPw = credSnap.data().pw || DEFAULT_PW;
-    }
-
+    const validId = credSnap.exists() ? (credSnap.data().id || DEFAULT_ID) : DEFAULT_ID;
+    const validPw = credSnap.exists() ? (credSnap.data().pw || DEFAULT_PW) : DEFAULT_PW;
     if (id === validId && pw === validPw) {
-        sessionStorage.setItem('adminLoggedIn', 'true');
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('admin-dashboard').classList.remove('hidden');
-        initAdminDashboard();
+        sessionStorage.setItem('adminOK', '1');
+        showDash();
     } else {
-        showError('ID 또는 비밀번호가 올바르지 않습니다.');
+        toast('ID 또는 비밀번호가 틀렸습니다', 'err');
     }
 };
+window.adminLogout = () => { sessionStorage.removeItem('adminOK'); location.reload(); };
 
-window.adminLogout = () => {
-    sessionStorage.removeItem('adminLoggedIn');
-    location.reload();
-};
-
-// 세션 유지 (새로고침 시 로그인 유지)
-if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+function showDash() {
     document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('admin-dashboard').classList.remove('hidden');
-    initAdminDashboard();
+    document.getElementById('admin-dash').classList.remove('hidden');
+    initDash();
 }
+if (sessionStorage.getItem('adminOK') === '1') showDash();
 
 // ══════════════════════════════
-// 관리자 대시보드 초기화
+// 대시보드 초기화
 // ══════════════════════════════
-function initAdminDashboard() {
+function initDash() {
+    loadBandInfo();
     loadMembers();
     loadInvites();
-    loadStudio();
 }
 
-// ── 멤버 목록 ──
+// ══════════════════════════════
+// 밴드 고유코드 생성
+// 형식: 지역(2) + 연월(4) + 난수(4) 예) SE2604-K7M2
+// ══════════════════════════════
+function genBandCode(region) {
+    const now = new Date();
+    const ym  = String(now.getFullYear()).slice(2) + String(now.getMonth()+1).padStart(2,'0');
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 혼동 문자 제외
+    let rand = '';
+    for (let i = 0; i < 4; i++) rand += chars[Math.floor(Math.random() * chars.length)];
+    return `${region}${ym}-${rand}`;
+}
+
+// 멤버 개인 난수 4자리
+function genMemberRand() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let r = '';
+    for (let i = 0; i < 4; i++) r += chars[Math.floor(Math.random() * chars.length)];
+    return r;
+}
+
+// ══════════════════════════════
+// 밴드 정보 저장
+// ══════════════════════════════
+async function loadBandInfo() {
+    const snap = await getDoc(doc(db, 'usan_system', 'band_info'));
+    if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById('band-name').value   = d.name     || '';
+        document.getElementById('studio-name').value = d.studioName || '';
+        document.getElementById('studio-addr').value = d.studioAddr || '';
+        if (d.region) document.getElementById('band-region').value = d.region;
+        if (d.bandCode) {
+            document.getElementById('band-code-display').textContent = d.bandCode;
+            document.getElementById('invite-band-code').textContent  = d.bandCode;
+        }
+        if (d.parts && d.parts.length) {
+            // 저장된 파트 복원
+            d.parts.forEach(p => addInstrumentDirect(p));
+        }
+    }
+}
+
+window.saveBandInfo = async () => {
+    const name   = document.getElementById('band-name').value.trim();
+    const region = document.getElementById('band-region').value;
+    const sName  = document.getElementById('studio-name').value.trim();
+    const sAddr  = document.getElementById('studio-addr').value.trim();
+    if (!name) { toast('밴드명을 입력하세요', 'err'); return; }
+
+    // 기존 코드가 있으면 유지, 없으면 새로 생성
+    const existing = await getDoc(doc(db, 'usan_system', 'band_info'));
+    const bandCode = (existing.exists() && existing.data().bandCode)
+        ? existing.data().bandCode
+        : genBandCode(region);
+
+    await setDoc(doc(db, 'usan_system', 'band_info'), {
+        name, region, studioName: sName, studioAddr: sAddr, bandCode,
+        updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    document.getElementById('band-code-display').textContent = bandCode;
+    document.getElementById('invite-band-code').textContent  = bandCode;
+    toast('밴드 정보가 저장되었습니다!', 'ok');
+};
+
+// ══════════════════════════════
+// 악기 구성
+// ══════════════════════════════
+let selectedParts = []; // [{key:'GUITAR', label:'🎸 기타', count:1}, ...]
+const instrumentCounts = {}; // 악기별 추가 횟수 추적
+
+function addInstrumentDirect(partKey) {
+    // 로드 시 복원용 (카운트 없이 직접 추가)
+    selectedParts.push(partKey);
+    renderParts();
+}
+
+window.addInstrument = (key) => {
+    instrumentCounts[key] = (instrumentCounts[key] || 0) + 1;
+    const count = instrumentCounts[key];
+    const partKey = count > 1 ? `${key}${count}` : key;
+    selectedParts.push(partKey);
+    renderParts();
+};
+
+window.addCustomInstrument = () => {
+    const val = document.getElementById('custom-instrument').value.trim().toUpperCase().replace(/\s+/g,'_');
+    if (!val) { toast('악기명을 입력하세요', 'err'); return; }
+    instrumentCounts[val] = (instrumentCounts[val] || 0) + 1;
+    const count = instrumentCounts[val];
+    const partKey = count > 1 ? `${val}${count}` : val;
+    selectedParts.push(partKey);
+    document.getElementById('custom-instrument').value = '';
+    renderParts();
+};
+
+function renderParts() {
+    const container = document.getElementById('selected-parts');
+    const noMsg     = document.getElementById('no-parts-msg');
+    document.getElementById('part-count').textContent = `${selectedParts.length}명`;
+
+    if (selectedParts.length === 0) {
+        container.innerHTML = '';
+        noMsg.style.display = 'block';
+        return;
+    }
+    noMsg.style.display = 'none';
+    container.innerHTML = '';
+    selectedParts.forEach((part, idx) => {
+        const icon = partIcon(part);
+        const row  = document.createElement('div');
+        row.style.cssText = 'background:#0f172a;border:1px solid #1e3a5f;border-radius:.6rem;padding:.5rem .85rem;display:flex;align-items:center;justify-content:space-between;';
+        row.innerHTML = `
+            <span style="font-size:.85rem;color:#93c5fd;font-weight:700;">${icon} ${part}</span>
+            <button onclick="removePart(${idx})" style="font-size:.7rem;color:#ef4444;background:#7f1d1d;border:none;border-radius:.4rem;padding:.2rem .55rem;cursor:pointer;font-weight:700;">제거</button>`;
+        container.appendChild(row);
+    });
+    // 단일 초대코드 생성용 셀렉트 업데이트
+    updateSinglePartSelect();
+    // 초대코드 탭 파트 미리보기
+    document.getElementById('invite-parts-preview').textContent = selectedParts.join(', ') || '—';
+}
+
+window.removePart = (idx) => {
+    selectedParts.splice(idx, 1);
+    renderParts();
+};
+
+function partIcon(key) {
+    const map = { VOCAL:'🎤', GUITAR:'🎸', BASS:'🎸', DRUM:'🥁', KEY:'🎹', PIANO:'🎹', VIOLIN:'🎻', SAX:'🎷', TRUMPET:'🎺', HARMONICA:'🪗' };
+    for (const k of Object.keys(map)) { if (key.startsWith(k)) return map[k]; }
+    return '🎵';
+}
+
+window.saveInstruments = async () => {
+    if (selectedParts.length === 0) { toast('악기를 하나 이상 선택하세요', 'err'); return; }
+    await setDoc(doc(db, 'usan_system', 'band_info'), { parts: selectedParts }, { merge: true });
+    toast(`${selectedParts.length}개 파트 구성 저장!`, 'ok');
+};
+
+// ══════════════════════════════
+// 초대코드 생성
+// 형식: {밴드코드}-{파트}-{멤버난수}
+// 예)  SE2604-K7M2-GUITAR-X3F8
+// ══════════════════════════════
+async function getBandCode() {
+    const snap = await getDoc(doc(db, 'usan_system', 'band_info'));
+    return snap.exists() ? snap.data().bandCode : null;
+}
+async function getPartsList() {
+    const snap = await getDoc(doc(db, 'usan_system', 'band_info'));
+    return snap.exists() ? (snap.data().parts || []) : [];
+}
+
+window.generateAllInvites = async () => {
+    const bandCode = await getBandCode();
+    if (!bandCode) { toast('먼저 밴드 정보를 저장하세요', 'err'); return; }
+    const parts = await getPartsList();
+    if (parts.length === 0) { toast('먼저 악기 구성을 저장하세요', 'err'); return; }
+
+    let created = 0;
+    for (const part of parts) {
+        // 이미 해당 파트의 미사용 코드가 있으면 건너뜀
+        const existing = await getDocs(query(
+            collection(db, 'usan_invites'),
+            where('part', '==', part),
+            where('used', '==', false)
+        ));
+        if (!existing.empty) continue;
+
+        const code = `${bandCode}-${part}-${genMemberRand()}`;
+        await addDoc(collection(db, 'usan_invites'), {
+            code, part, bandCode, used: false, createdAt: serverTimestamp()
+        });
+        created++;
+    }
+    toast(created > 0 ? `${created}개 초대코드 생성 완료!` : '이미 모든 파트에 코드가 있습니다', created > 0 ? 'ok' : 'warn');
+};
+
+window.generateSingleInvite = () => {
+    const panel = document.getElementById('single-invite-panel');
+    panel.classList.toggle('hidden');
+};
+
+window.doSingleInvite = async () => {
+    const part = document.getElementById('single-part-select').value;
+    if (!part) { toast('파트를 선택하세요', 'err'); return; }
+    const bandCode = await getBandCode();
+    if (!bandCode) { toast('먼저 밴드 정보를 저장하세요', 'err'); return; }
+    const code = `${bandCode}-${part}-${genMemberRand()}`;
+    await addDoc(collection(db, 'usan_invites'), {
+        code, part, bandCode, used: false, createdAt: serverTimestamp()
+    });
+    document.getElementById('single-invite-panel').classList.add('hidden');
+    toast(`${part} 코드 추가 생성!`, 'ok');
+};
+
+function updateSinglePartSelect() {
+    const sel = document.getElementById('single-part-select');
+    sel.innerHTML = '<option value="">파트 선택...</option>';
+    selectedParts.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p; opt.textContent = p;
+        sel.appendChild(opt);
+    });
+}
+
+// 초대코드 실시간 목록
+function loadInvites() {
+    onSnapshot(query(collection(db, 'usan_invites'), orderBy('createdAt', 'desc')), snap => {
+        const container = document.getElementById('invite-list');
+        if (snap.empty) {
+            container.innerHTML = '<p class="text-xs text-slate-600 text-center py-3">생성된 코드가 없습니다</p>';
+            return;
+        }
+        container.innerHTML = '';
+        snap.forEach(d => {
+            const data = d.data();
+            const usedBadge = data.used
+                ? '<span class="badge badge-used">사용됨</span>'
+                : '<span class="badge badge-fresh">미사용</span>';
+            const card = document.createElement('div');
+            card.className = 'invite-code-card';
+            card.innerHTML = `
+                <div>
+                    <div class="code-text">${data.code}</div>
+                    <div class="code-part">${data.part} · ${data.used ? '가입완료' : '대기중'}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                    ${usedBadge}
+                    ${!data.used
+                        ? `<button onclick="copyCode('${data.code}')" style="font-size:.7rem;background:#1e3a8a;color:#93c5fd;border:none;border-radius:.4rem;padding:.2rem .55rem;cursor:pointer;font-weight:700;">복사</button>
+                           <button onclick="revokeInvite('${d.id}')" style="font-size:.7rem;background:#7f1d1d;color:#fca5a5;border:none;border-radius:.4rem;padding:.2rem .55rem;cursor:pointer;font-weight:700;">취소</button>`
+                        : ''
+                    }
+                </div>`;
+            container.appendChild(card);
+        });
+    });
+}
+
+window.copyCode = (code) => {
+    navigator.clipboard.writeText(code).then(() => toast('코드 복사됨!', 'ok'));
+};
+
+window.copyAllCodes = async () => {
+    const snap = await getDocs(query(collection(db, 'usan_invites'), where('used', '==', false)));
+    if (snap.empty) { toast('미사용 코드가 없습니다', 'warn'); return; }
+    const lines = snap.docs.map(d => `${d.data().part}: ${d.data().code}`).join('\n');
+    navigator.clipboard.writeText(lines).then(() => toast('전체 코드 복사됨!', 'ok'));
+};
+
+window.revokeInvite = async (id) => {
+    if (confirm('이 초대코드를 삭제할까요?')) await deleteDoc(doc(db, 'usan_invites', id));
+};
+
+// ══════════════════════════════
+// 멤버 관리
+// ══════════════════════════════
 function loadMembers() {
     onSnapshot(collection(db, 'usan_band'), snap => {
         const list = document.getElementById('member-list');
-        const sel = document.getElementById('leader-select');
-        document.getElementById('total-count').textContent = `${snap.size}명`;
+        const sel  = document.getElementById('leader-select');
+        document.getElementById('member-count').textContent = `${snap.size}명`;
 
         list.innerHTML = '';
-        sel.innerHTML = '<option value="">-- 멤버 선택 --</option>';
+        sel.innerHTML  = '<option value="">-- 멤버 선택 --</option>';
 
+        if (snap.empty) {
+            list.innerHTML = '<p class="text-xs text-slate-600 text-center py-3">가입된 멤버가 없습니다</p>';
+            return;
+        }
         snap.forEach(d => {
-            const data = d.data();
-            const role = data.role || 'member';
-            const tagClass = role === 'superadmin' ? 'tag-admin' : role === 'leader' ? 'tag-leader' : 'tag-member';
-            const tagLabel = role === 'superadmin' ? '앱관리자' : role === 'leader' ? '리더' : '멤버';
-
-            const li = document.createElement('li');
-            li.className = 'flex items-center justify-between bg-slate-900 rounded-xl px-3 py-2.5';
-            li.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="badge ${tagClass}">${tagLabel}</span>
-                    <span class="text-sm font-bold text-slate-200">${data.part}</span>
-                    ${data.name ? `<span class="text-xs text-slate-400">${data.name}</span>` : ''}
+            const data   = d.data();
+            const role   = data.role || 'member';
+            const isLead = role === 'leader';
+            const row    = document.createElement('div');
+            row.className = 'member-row';
+            row.innerHTML = `
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                    <span class="badge ${isLead ? 'badge-leader' : 'badge-member'}">${isLead ? '리더' : '멤버'}</span>
+                    <span style="font-size:.85rem;font-weight:700;color:#cbd5e1;">${data.part}</span>
                 </div>
-                <div class="flex gap-2 items-center">
-                    <span class="text-xs text-slate-500">${data.joinedAt ? new Date(data.joinedAt).toLocaleDateString('ko') : ''}</span>
-                    ${data.part !== 'SYSADMIN' ? `<button onclick="removeMember('${d.id}')" class="btn-danger">제거</button>` : ''}
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                    <span style="font-size:.7rem;color:#475569;">${data.joinedAt ? new Date(data.joinedAt).toLocaleDateString('ko') : ''}</span>
+                    <button onclick="removeMember('${d.id}')" style="font-size:.7rem;background:#7f1d1d;color:#fca5a5;border:none;border-radius:.4rem;padding:.2rem .55rem;cursor:pointer;font-weight:700;">제거</button>
                 </div>`;
-            list.appendChild(li);
+            list.appendChild(row);
 
-            // 리더 지정 셀렉트 (시스템관리자 제외)
-            if (data.part !== 'SYSADMIN') {
-                const opt = document.createElement('option');
-                opt.value = d.id;
-                opt.textContent = `${data.part}${data.name ? ' ('+data.name+')' : ''}`;
-                if (role === 'leader') opt.textContent += ' ★현재리더';
-                sel.appendChild(opt);
-            }
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = `${data.part}${isLead ? ' ★현리더' : ''}`;
+            sel.appendChild(opt);
         });
     });
 }
 
 window.setLeader = async () => {
-    const sel = document.getElementById('leader-select');
-    const targetId = sel.value;
-    if (!targetId) return showError('멤버를 선택하세요');
-
-    // 기존 리더 -> member로 강등
+    const targetId = document.getElementById('leader-select').value;
+    if (!targetId) { toast('멤버를 선택하세요', 'err'); return; }
     const snap = await getDocs(collection(db, 'usan_band'));
     for (const d of snap.docs) {
-        if (d.data().role === 'leader') {
-            await updateDoc(d.ref, { role: 'member' });
-        }
+        if (d.data().role === 'leader') await updateDoc(d.ref, { role: 'member' });
     }
-    // 새 리더 지정
     await updateDoc(doc(db, 'usan_band', targetId), { role: 'leader' });
-    showSuccess(`${sel.options[sel.selectedIndex].text} → 밴드 리더로 지정했습니다!`);
+    toast('리더가 지정되었습니다!', 'ok');
 };
 
 window.removeMember = async (id) => {
-    if (!confirm(`${id} 멤버를 삭제할까요?`)) return;
-    await deleteDoc(doc(db, 'usan_band', id));
+    if (confirm(`${id} 멤버를 삭제할까요?`)) await deleteDoc(doc(db, 'usan_band', id));
 };
 
-// ── 초대코드 ──
-function loadInvites() {
-    onSnapshot(query(collection(db, 'usan_invites'), orderBy('createdAt','desc')), snap => {
-        const list = document.getElementById('invite-list');
-        if (snap.empty) { list.innerHTML = '<li class="text-center py-2 text-xs">발급된 코드가 없습니다</li>'; return; }
-        list.innerHTML = '';
-        snap.forEach(d => {
-            const data = d.data();
-            const used = data.used ? '<span class="badge tag-member">사용됨</span>' : '<span class="badge tag-leader">미사용</span>';
-            const li = document.createElement('li');
-            li.className = 'flex items-center justify-between bg-slate-900 rounded-xl px-3 py-2';
-            li.innerHTML = `
-                <span class="font-mono text-blue-400 font-bold text-sm">${data.code}</span>
-                <div class="flex items-center gap-2">${used}
-                    ${!data.used ? `<button onclick="revokeInvite('${d.id}')" class="btn-danger">취소</button>` : ''}
-                </div>`;
-            list.appendChild(li);
-        });
-    });
-}
-
-window.generateInvite = async () => {
-    const part = document.getElementById('invite-part').value.trim().toUpperCase();
-    const num = document.getElementById('invite-num').value.trim();
-    if (!part || num.length !== 4) return showError('파트명과 4자리 코드번호를 입력하세요');
-    const code = `${part}-${num}`;
-    await addDoc(collection(db, 'usan_invites'), { code, part, used: false, createdAt: serverTimestamp() });
-    document.getElementById('invite-code-display').textContent = code;
-    document.getElementById('invite-result').classList.remove('hidden');
-};
-
-window.copyInvite = () => {
-    const code = document.getElementById('invite-code-display').textContent;
-    navigator.clipboard.writeText(code).then(() => showSuccess('코드가 복사되었습니다!'));
-};
-
-window.revokeInvite = async (id) => {
-    if (confirm('초대코드를 취소할까요?')) await deleteDoc(doc(db, 'usan_invites', id));
-};
-
-// ── 합주실 설정 ──
-async function loadStudio() {
-    const snap = await getDoc(doc(db, 'usan_system', 'settings'));
-    if (snap.exists()) {
-        document.getElementById('studio-name').value = snap.data().studioName || '';
-        document.getElementById('studio-addr').value = snap.data().studioAddr || '';
-    }
-}
-
-window.saveStudio = async () => {
-    const name = document.getElementById('studio-name').value.trim();
-    const addr = document.getElementById('studio-addr').value.trim();
-    await setDoc(doc(db, 'usan_system', 'settings'), { studioName: name, studioAddr: addr }, { merge: true });
-    showSuccess('합주실 정보가 저장되었습니다!');
-};
-
-// ── 비밀번호 변경 ──
+// ══════════════════════════════
+// 시스템 설정
+// ══════════════════════════════
 window.changePw = async () => {
-    const pw = document.getElementById('new-pw').value;
-    const confirm2 = document.getElementById('new-pw-confirm').value;
-    if (!pw) return showError('비밀번호를 입력하세요');
-    if (pw !== confirm2) return showError('비밀번호가 일치하지 않습니다');
-    if (pw.length < 6) return showError('6자 이상 입력하세요');
+    const pw  = document.getElementById('new-pw').value;
+    const pw2 = document.getElementById('new-pw-confirm').value;
+    if (!pw || pw.length < 6) { toast('6자 이상 입력하세요', 'err'); return; }
+    if (pw !== pw2) { toast('비밀번호가 일치하지 않습니다', 'err'); return; }
     await setDoc(doc(db, 'usan_system', 'admin_credentials'), { id: 'admin', pw }, { merge: true });
     document.getElementById('new-pw').value = '';
     document.getElementById('new-pw-confirm').value = '';
-    showSuccess('비밀번호가 변경되었습니다!');
+    toast('비밀번호 변경 완료!', 'ok');
 };
 
-// ── 데이터 초기화 ──
-window.clearData = async (colName) => {
-    if (!confirm(`"${colName}" 컬렉션 전체를 삭제할까요? 되돌릴 수 없습니다.`)) return;
-    const snap = await getDocs(collection(db, colName));
+window.clearCol = async (col) => {
+    if (!confirm(`"${col}" 전체를 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    const snap = await getDocs(collection(db, col));
     for (const d of snap.docs) await deleteDoc(d.ref);
-    showSuccess('삭제 완료!');
+    toast('삭제 완료!', 'ok');
 };
 
-// ── 탭 전환 ──
+// ══════════════════════════════
+// 탭 전환
+// ══════════════════════════════
 window.switchTab = (name) => {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`tab-${name}`).classList.add('active');
-    document.querySelectorAll('[id^="tab-btn-"]').forEach(b => {
-        b.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-slate-400';
-    });
-    document.getElementById(`tab-btn-${name}`).className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white';
+    document.getElementById(`tn-${name}`).classList.add('active');
 };
 
-// ── 알림 유틸 ──
-function showSuccess(msg) {
-    const el = makeToast(msg, '#14532d', '#86efac');
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2800);
-}
-function showError(msg) {
-    const el = makeToast(msg, '#7f1d1d', '#fca5a5');
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2800);
-}
-function makeToast(msg, bg, color) {
+// ══════════════════════════════
+// 토스트 알림
+// ══════════════════════════════
+function toast(msg, type='ok') {
+    const colors = { ok: ['#14532d','#86efac'], err: ['#7f1d1d','#fca5a5'], warn: ['#713f12','#fde68a'] };
+    const [bg, color] = colors[type] || colors.ok;
     const el = document.createElement('div');
-    el.style.cssText = `position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);background:${bg};color:${color};padding:.65rem 1.25rem;border-radius:.75rem;font-size:.8rem;font-weight:700;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4)`;
+    el.className = 'toast';
+    el.style.cssText = `background:${bg};color:${color};`;
     el.textContent = msg;
-    return el;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
 }
 
-// 엔터키 로그인
+// 엔터키
 document.getElementById('admin-pw-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') adminLogin();
 });
