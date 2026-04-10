@@ -686,6 +686,7 @@ for(let h=9;h<=22;h++){['00','30'].forEach(m=>TIMES.push(`${String(h).padStart(2
 let voteYear  = new Date().getFullYear();
 let voteMonth = new Date().getMonth();
 let currentVoteId = null;
+let mySubmitted = false; // 멤버 제출 여부
 
 // 멤버가 선택 중인 날짜별 시간범위 { 'YYYY-MM-DD': {from:'14:00', to:'18:00'} }
 let myAvailDates = {};
@@ -769,9 +770,18 @@ function renderVote(data) {
     document.getElementById('vote-status-badge').textContent =
         `수렴중 · ${parseInt(mo)}월 · ${Object.keys(responses).length}명 응답`;
 
-    // ── 멤버 뷰: 달력으로 날짜+시간범위 선택 ──
+    // ── 멤버 뷰: 이미 제출했으면 현황판, 아니면 달력 ──
+    const alreadySubmitted = myPart in responses;
     document.getElementById('vote-member-section').classList.remove('hidden');
-    renderMemberCalendar(data, yr, mo, responses);
+    if(alreadySubmitted && !mySubmitted) {
+        // 기존 응답 복원 후 현황판 표시
+        myAvailDates = {};
+        (responses[myPart]||[]).forEach(r=>{ myAvailDates[r.date]={from:r.from,to:r.to}; });
+        mySubmitted = true;
+        showMemberResultView();
+    } else if(!mySubmitted) {
+        renderMemberCalendar(data, yr, mo, responses);
+    }
 
     // ── 리더 뷰: 취합 결과 ──
     if(myRole==='leader') {
@@ -861,32 +871,119 @@ function renderMemberTimeList() {
         const {from,to} = myAvailDates[ds];
         const row = document.createElement('div');
         row.className='bg-blue-50 rounded-xl px-3 py-2.5';
+        // 종료 시간: 시작보다 최소 30분 이후 옵션만 표시
+        const fromMin_ = toMin(from);
+        const validToTimes = TIMES.filter(t => toMin(t) > fromMin_);
+        // 현재 to가 유효하지 않으면 자동 보정
+        if(toMin(to) <= fromMin_) {
+            myAvailDates[ds].to = validToTimes[0] || TIMES[TIMES.length-1];
+        }
+        const safeFrom = myAvailDates[ds].from;
+        const safeTo   = myAvailDates[ds].to;
         row.innerHTML=`
-            <p class="text-xs font-bold text-blue-800 mb-2">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</p>
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-xs font-bold text-blue-800">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</p>
+                <button onclick="removeMemberDate('${ds}')" class="text-xs text-blue-400 px-1">✕</button>
+            </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs text-blue-600 w-8">시작</span>
-                <select onchange="myAvailDates['${ds}'].from=this.value;renderMemberTimeList()" class="flex-1 text-xs border border-blue-200 rounded-lg px-2 py-1.5 bg-white text-blue-700 font-bold">
-                    ${TIMES.map(t=>`<option value="${t}" ${from===t?'selected':''}>${t}</option>`).join('')}
+                <span class="text-xs text-blue-600 w-8 flex-none">시작</span>
+                <select onchange="onFromChange('${ds}',this.value)" class="flex-1 text-xs border border-blue-200 rounded-lg px-2 py-1.5 bg-white text-blue-700 font-bold">
+                    ${TIMES.map(t=>`<option value="${t}" ${safeFrom===t?'selected':''}>${t}</option>`).join('')}
                 </select>
-                <span class="text-xs text-blue-400">~</span>
-                <select onchange="myAvailDates['${ds}'].to=this.value;renderMemberTimeList()" class="flex-1 text-xs border border-blue-200 rounded-lg px-2 py-1.5 bg-white text-blue-700 font-bold">
-                    ${TIMES.map(t=>`<option value="${t}" ${to===t?'selected':''}>${t}</option>`).join('')}
+                <span class="text-xs text-blue-400 flex-none">~</span>
+                <select id="to-${ds}" onchange="myAvailDates['${ds}'].to=this.value" class="flex-1 text-xs border border-blue-200 rounded-lg px-2 py-1.5 bg-white text-blue-700 font-bold">
+                    ${validToTimes.map(t=>`<option value="${t}" ${safeTo===t?'selected':''}>${t}</option>`).join('')}
                 </select>
-                <span class="text-xs text-blue-600 w-8">종료</span>
+                <span class="text-xs text-blue-600 w-8 flex-none">종료</span>
             </div>`;
         list.appendChild(row);
     });
 }
 
+// 시작시간 변경 시 종료시간 자동 보정
+window.onFromChange = (ds, newFrom) => {
+    myAvailDates[ds].from = newFrom;
+    const fromMin_ = toMin(newFrom);
+    // 현재 종료가 시작보다 같거나 이전이면 자동으로 +30분
+    if(toMin(myAvailDates[ds].to) <= fromMin_) {
+        const nextIdx = TIMES.findIndex(t=>toMin(t)>fromMin_);
+        myAvailDates[ds].to = nextIdx>=0 ? TIMES[nextIdx] : TIMES[TIMES.length-1];
+    }
+    renderMemberTimeList();
+};
+
+// 달력에서 날짜 개별 제거
+window.removeMemberDate = (ds) => {
+    delete myAvailDates[ds];
+    const cell = document.getElementById(`mcell-${ds}`);
+    if(cell){
+        cell.classList.remove('selected');
+        const d=new Date(ds); if(d.getTime()===new Date().setHours(0,0,0,0)) cell.classList.add('today');
+    }
+    renderMemberTimeList();
+};
+
 // 제출
 document.getElementById('submit-vote-btn').addEventListener('click', async () => {
     if(!currentVoteId) return;
     const arr = Object.entries(myAvailDates).map(([date,{from,to}])=>({date,from,to}));
+    if(!arr.length) return toast('가능한 날짜를 선택해주세요','warn');
     await updateDoc(doc(db,'usan_vote',currentVoteId), {
         [`responses.${myPart}`]: arr
     });
-    toast('제출 완료! 리더가 취합 중입니다.','ok');
+    mySubmitted = true;
+    // 제출 후 달력 숨기고 현황판으로 전환
+    showMemberResultView();
+    toast('제출 완료! 취합 현황을 확인하세요.','ok');
 });
+
+// 멤버 제출 후 취합 현황판 표시 (읽기 전용)
+function showMemberResultView() {
+    const memberSec = document.getElementById('vote-member-section');
+    const existingResult = document.getElementById('member-readonly-result');
+    if(existingResult) existingResult.remove();
+
+    const wrap = document.createElement('div');
+    wrap.id = 'member-readonly-result';
+    wrap.className = 'space-y-2';
+    wrap.innerHTML = `
+        <div class="bg-green-50 border border-green-200 rounded-xl px-3 py-2.5 flex items-center gap-2">
+            <span class="text-green-600 font-bold text-sm">✅</span>
+            <div>
+                <p class="text-xs font-bold text-green-700">제출 완료</p>
+                <p class="text-xs text-green-600">리더가 취합 후 확정합니다</p>
+            </div>
+            <button onclick="editMyResponse()" class="ml-auto text-xs text-blue-500 border border-blue-200 bg-white px-2 py-1 rounded-lg">수정</button>
+        </div>
+        <div id="member-summary-list" class="space-y-1"></div>`;
+    memberSec.innerHTML = '';
+    memberSec.appendChild(wrap);
+    memberSec.classList.remove('hidden');
+
+    // 내 제출 내역 요약
+    const summaryList = document.getElementById('member-summary-list');
+    Object.entries(myAvailDates).sort(([a],[b])=>a.localeCompare(b)).forEach(([ds,{from,to}])=>{
+        const [,mm,dd]=ds.split('-');
+        const dn=DAY[new Date(ds).getDay()];
+        const item=document.createElement('div');
+        item.className='flex justify-between items-center bg-gray-50 rounded-lg px-3 py-1.5';
+        item.innerHTML=`<span class="text-xs text-gray-700 font-bold">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</span><span class="text-xs text-blue-600">${from} ~ ${to}</span>`;
+        summaryList.appendChild(item);
+    });
+}
+
+// 수정 버튼 → 달력 다시 표시
+window.editMyResponse = () => {
+    mySubmitted = false;
+    // 강제로 현재 voteData를 다시 렌더 (renderVote 재호출)
+    const unsubTemp = onSnapshot(collection(db,'usan_vote'), snap => {
+        if(!snap.empty) renderMemberCalendar(snap.docs[0].data(),
+            snap.docs[0].data().targetMonth?.split('-')[0],
+            snap.docs[0].data().targetMonth?.split('-')[1],
+            snap.docs[0].data().responses||{});
+        unsubTemp();
+    });
+};
 
 // ── 리더: 취합 결과 UI ──
 function renderLeaderResult(responses, yr, mo) {
@@ -1025,14 +1122,18 @@ function renderConfirmedDates(confirmedDates, data) {
         card.className='bg-green-50 border border-green-200 rounded-2xl p-4';
         card.innerHTML=`
             <div class="flex justify-between items-center">
-                <div>
+                <div class="flex-1 min-w-0">
                     <p class="text-xs font-bold text-green-600 mb-0.5">✅ 확정된 합주</p>
                     <p class="text-sm font-bold text-green-800">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn}) ${p.time} 시작</p>
-                    <p id="confirmed-studio-text" class="text-xs text-green-600 mt-0.5"></p>
+                    <p class="confirmed-studio-label text-xs text-green-600 mt-0.5">${studioNameCache}</p>
                 </div>
-                <div class="flex flex-col items-end gap-1">
+                <div class="flex flex-col items-end gap-1.5 ml-3 flex-none">
                     <span class="text-xl font-bold text-green-600">${ddLabel}</span>
-                    ${myRole==='leader'?`<button onclick="resetVote()" class="text-xs text-red-400 border border-red-200 bg-white px-2 py-0.5 rounded-lg">↩ 재수렴</button>`:''}
+                    ${myRole==='leader'?`
+                    <div class="flex gap-1">
+                        <button onclick="deleteOneConfirmed('${p.date}')" class="text-xs text-orange-500 border border-orange-200 bg-white px-2 py-0.5 rounded-lg">🗑 삭제</button>
+                        <button onclick="resetVote()" class="text-xs text-red-400 border border-red-200 bg-white px-2 py-0.5 rounded-lg">↩ 재수렴</button>
+                    </div>`:''}
                 </div>
             </div>`;
         wrap.appendChild(card);
@@ -1046,11 +1147,29 @@ function renderLeaderConfirmedTools() {
     // 이미 renderConfirmedDates에서 버튼 포함됨
 }
 
-// ── 재수렴 ──
+// ── 확정 날짜 개별 삭제 (리더) ──
+window.deleteOneConfirmed = async (dateStr) => {
+    if(!confirm(`${dateStr} 합주 일정을 삭제할까요?\n다른 날짜는 유지됩니다.`)) return;
+    if(!currentVoteId) return;
+    const snap = await getDoc(doc(db,'usan_vote',currentVoteId));
+    const current = snap.data().confirmedDates || [];
+    const updated = current.filter(p=>p.date!==dateStr);
+    if(updated.length===0){
+        await updateDoc(doc(db,'usan_vote',currentVoteId),{confirmedDates:[],status:'open'});
+    } else {
+        await updateDoc(doc(db,'usan_vote',currentVoteId),{confirmedDates:updated});
+    }
+    const [,mm,dd]=dateStr.split('-');
+    toast(`${parseInt(mm)}/${parseInt(dd)} 일정 삭제됨`,'warn');
+};
+
+// ── 전체 재수렴 ──
 window.resetVote = async () => {
-    if(!confirm('확정을 취소하고 날짜 수렴을 다시 시작할까요?')) return;
+    if(!confirm('모든 확정을 취소하고 날짜 수렴을 처음부터 다시 시작할까요?\n멤버 응답 데이터도 삭제됩니다.')) return;
     if(!currentVoteId) return;
     await deleteDoc(doc(db,'usan_vote',currentVoteId));
+    mySubmitted = false;
+    myAvailDates = {};
     toast('초기화됐습니다. 새 수렴을 시작해주세요.','warn');
 };
 
@@ -1058,15 +1177,8 @@ window.resetVote = async () => {
 function toMin(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
 function fromMin(m){ return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
 
-// ── 투표 재시작 (리더) ──
-window.resetVote = async () => {
-    if (!confirm('확정을 취소하고 새 투표를 다시 만드시겠습니까?\n기존 투표 데이터는 삭제됩니다.')) return;
-    if (!currentVoteId) return;
-    await deleteDoc(doc(db,'usan_vote',currentVoteId));
-    document.getElementById('confirmed-schedule').classList.add('hidden');
-    document.getElementById('confirmed-leader-btns').classList.add('hidden');
-    toast('투표가 초기화됐습니다. 새 투표를 만들어주세요.','warn');
-};
+// (resetVote는 위에서 정의됨)
+
 
 // ── 확정일 수정 (리더) ──
 window.openEditConfirmed = async () => {
