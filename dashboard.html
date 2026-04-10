@@ -146,84 +146,56 @@
 <!-- ══ ② 스케줄 탭 ══ -->
 <div id="tab-schedule" class="tab-content space-y-4">
 
-    <!-- 확정 일정 -->
-    <div id="confirmed-schedule" class="hidden bg-green-50 border border-green-200 rounded-2xl p-4">
-        <div class="flex justify-between items-start mb-1">
-            <p class="text-xs font-bold text-green-600">✅ 확정된 합주일</p>
-            <div id="confirmed-leader-btns" class="hidden flex gap-1.5">
-                <button onclick="openEditConfirmed()" class="text-xs text-blue-600 border border-blue-300 bg-white px-2 py-0.5 rounded-lg font-bold">✏️ 수정</button>
-                <button onclick="resetVote()" class="text-xs text-red-500 border border-red-200 bg-white px-2 py-0.5 rounded-lg font-bold">↩ 재투표</button>
-            </div>
-        </div>
-        <p id="confirmed-date-text" class="text-base font-bold text-green-800"></p>
-        <p id="confirmed-studio-text" class="text-xs text-green-600 mt-0.5"></p>
-        <p class="text-xs text-green-500 mt-1">스케줄 자동 등록됨</p>
-    </div>
+    <!-- 확정된 합주일 목록 -->
+    <div id="confirmed-schedule-wrap" class="space-y-2"></div>
 
-    <!-- 투표 상태 표시 -->
+    <!-- 투표 현황 카드 -->
     <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
         <div class="flex justify-between items-center">
-            <p class="text-sm font-bold text-gray-700">합주 날짜 투표</p>
+            <p class="text-sm font-bold text-gray-700">📅 합주 날짜 투표</p>
             <span id="vote-status-badge" class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">대기 중</span>
         </div>
 
-        <!-- 투표 진행 중: 멤버 체크 UI -->
-        <div id="vote-options" class="space-y-2">
-            <p class="text-gray-400 text-sm text-center py-4">진행 중인 투표가 없습니다</p>
+        <!-- 멤버: 가능한 날짜+시간범위 제출 -->
+        <div id="vote-member-section" class="hidden space-y-2">
+            <p class="text-xs text-gray-500">가능한 날짜와 시간 범위를 선택해주세요</p>
+            <div id="vote-member-list" class="space-y-2"></div>
+            <button id="submit-vote-btn" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">제출하기</button>
         </div>
-        <button id="submit-vote-btn" class="hidden w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">내 가능한 날짜 제출하기</button>
 
-        <!-- 리더 전용: 결과 보고 확정 -->
-        <div id="vote-result-panel" class="hidden">
-            <div class="bg-blue-50 rounded-xl p-3 mb-2">
-                <p class="text-xs font-bold text-blue-700 mb-1">📊 취합 결과</p>
-                <div id="vote-result-list" class="space-y-1.5"></div>
-            </div>
-            <button id="confirm-vote-btn" class="hidden w-full py-3 bg-green-600 text-white font-bold rounded-xl text-sm">✅ 날짜 확정하기</button>
+        <!-- 리더: 취합 결과 -->
+        <div id="vote-result-panel" class="hidden space-y-2">
+            <p class="text-xs font-bold text-gray-500">📊 멤버별 가능 날짜 취합</p>
+            <div id="vote-result-list" class="space-y-2"></div>
+            <p class="text-xs text-blue-600 font-bold mt-1">✅ 확정할 날짜를 선택 후 버튼을 누르세요 (복수 선택 가능)</p>
+            <button id="confirm-vote-btn" class="hidden w-full py-3 bg-green-600 text-white font-bold rounded-xl text-sm">선택한 날짜 확정하기</button>
         </div>
+
+        <div id="vote-empty-msg" class="text-gray-400 text-sm text-center py-4">진행 중인 투표가 없습니다</div>
     </div>
 
-    <!-- 리더: 새 투표 만들기 -->
+    <!-- 리더: 새 투표 시작 -->
     <div id="create-vote-section" class="hidden bg-white rounded-2xl p-4 shadow-sm space-y-4">
-        <div class="flex justify-between items-center">
-            <p class="text-sm font-bold text-gray-700">📅 합주 날짜 투표 만들기</p>
-        </div>
+        <p class="text-sm font-bold text-gray-700">📣 합주 날짜 수렴 시작</p>
+        <p class="text-xs text-gray-400">멤버들에게 가능한 날짜·시간을 제출받습니다.<br>날짜는 리더가 미리 지정하지 않고 멤버가 직접 선택합니다.</p>
 
-        <!-- Step 1: 월 + 날짜 탭선택 -->
+        <!-- 대상 월 -->
         <div>
-            <p class="text-xs text-gray-500 mb-2">① 후보 날짜 선택 <span class="text-blue-500">(여러 개 가능)</span></p>
-            <div class="flex items-center gap-3 mb-3">
-                <button onclick="changeVoteMonth(-1)" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 font-bold">‹</button>
+            <p class="text-xs text-gray-500 mb-2">① 대상 월 선택</p>
+            <div class="flex items-center gap-3">
+                <button onclick="changeVoteMonth(-1)" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 font-bold text-sm">‹</button>
                 <span id="vote-month-label" class="flex-1 text-center text-sm font-bold text-gray-800"></span>
-                <button onclick="changeVoteMonth(1)" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 font-bold">›</button>
+                <button onclick="changeVoteMonth(1)" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 font-bold text-sm">›</button>
             </div>
-            <div class="grid grid-cols-7 gap-0.5 mb-1">
-                <div class="text-center text-xs text-red-400 py-1">일</div>
-                <div class="text-center text-xs text-gray-400 py-1">월</div>
-                <div class="text-center text-xs text-gray-400 py-1">화</div>
-                <div class="text-center text-xs text-gray-400 py-1">수</div>
-                <div class="text-center text-xs text-gray-400 py-1">목</div>
-                <div class="text-center text-xs text-gray-400 py-1">금</div>
-                <div class="text-center text-xs text-blue-400 py-1">토</div>
-            </div>
-            <div id="vote-cal-grid" class="grid grid-cols-7 gap-0.5"></div>
         </div>
 
-        <!-- Step 2: 선택 날짜별 시간 설정 -->
+        <!-- 안내 메시지 -->
         <div>
-            <p class="text-xs text-gray-500 mb-2">② 날짜별 시간 설정 <span class="text-gray-400">(30분 단위)</span></p>
-            <div id="selected-dates-list">
-                <p class="text-xs text-gray-400 text-center py-2">위에서 날짜를 선택하세요</p>
-            </div>
+            <p class="text-xs text-gray-500 mb-1.5">② 멤버 안내 메시지 <span class="text-gray-400">(선택)</span></p>
+            <textarea id="vote-message" rows="2" placeholder="예: 5월 합주 일정 잡겠습니다. 가능한 날짜와 시간대를 알려주세요!" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm resize-none"></textarea>
         </div>
 
-        <!-- Step 3: 안내 메시지 -->
-        <div>
-            <p class="text-xs text-gray-500 mb-1.5">③ 멤버 안내 메시지 <span class="text-gray-400">(선택)</span></p>
-            <textarea id="vote-message" rows="2" placeholder="예: 이번 달 합주 날짜 투표입니다. 가능한 날짜 모두 선택해주세요!" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm resize-none"></textarea>
-        </div>
-
-        <button onclick="createVote()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">투표 시작 · 멤버에게 알리기</button>
+        <button onclick="createVote()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">📣 수렴 시작 · 멤버에게 알리기</button>
     </div>
 </div>
 
@@ -476,6 +448,7 @@ const db  = getFirestore(app);
 
 const myPart = localStorage.getItem('myPart');
 if (!myPart) { location.href = 'index.html'; }
+let studioNameCache = '';
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
     if (confirm('로그아웃 하시겠습니까?')) { localStorage.clear(); location.href = 'index.html'; }
@@ -537,11 +510,13 @@ onSnapshot(doc(db,'usan_system','band_info'), snap => {
     const d = snap.data();
     if (d.name) document.getElementById('hd-bandname').textContent = d.name;
     if (d.studioName) {
+        studioNameCache = d.studioName + (d.studioAddr ? ` · ${d.studioAddr}` : '');
         document.getElementById('studio-info').classList.remove('hidden');
         document.getElementById('studio-name-display').textContent = d.studioName;
         document.getElementById('studio-addr-display').textContent = d.studioAddr||'';
-        document.getElementById('confirmed-studio-text').textContent = d.studioName+(d.studioAddr?` · ${d.studioAddr}`:'');
         document.getElementById('member-tab-studio').textContent = d.studioName+(d.studioAddr?'\n'+d.studioAddr:'');
+        // 확정 카드의 합주실 텍스트 갱신
+        document.querySelectorAll('#confirmed-studio-text').forEach(el=>el.textContent=studioNameCache);
     }
     // 음원 파트 드롭다운 업데이트
     if (d.parts?.length) {
@@ -699,226 +674,389 @@ window.postRef = async () => {
 window.deleteRef = async id => { if(confirm('삭제할까요?')) await deleteDoc(doc(db,'usan_refs',id)); };
 
 // ══════════════════════════════
-// 합주 날짜 투표 (1.5단계)
+// 합주 날짜 투표 — 새 구조
+// 리더: 월 지정 후 수렴 시작
+// 멤버: 달력에서 날짜+시간범위 직접 선택 제출
+// 리더: 취합 결과 보고 복수 날짜 확정
 // ══════════════════════════════
+const DAY = ['일','월','화','수','목','금','토'];
+const TIMES = [];
+for(let h=9;h<=22;h++){['00','30'].forEach(m=>TIMES.push(`${String(h).padStart(2,'0')}:${m}`));}
+
 let voteYear  = new Date().getFullYear();
 let voteMonth = new Date().getMonth();
-let selectedDates = {};
 let currentVoteId = null;
-let myVotedIndices = [];
 
-renderVoteCal();
+// 멤버가 선택 중인 날짜별 시간범위 { 'YYYY-MM-DD': {from:'14:00', to:'18:00'} }
+let myAvailDates = {};
+// 리더가 확정 선택한 날짜 인덱스 Set
+let leaderPickedDates = new Set();
 
-function renderVoteCal() {
-    const label = document.getElementById('vote-month-label');
-    if (!label) return;
-    label.textContent = `${voteYear}년 ${voteMonth+1}월`;
-    const grid = document.getElementById('vote-cal-grid');
-    grid.innerHTML='';
-    const firstDay = new Date(voteYear,voteMonth,1).getDay();
-    const lastDate = new Date(voteYear,voteMonth+1,0).getDate();
-    const today = new Date(); today.setHours(0,0,0,0);
-    for (let i=0;i<firstDay;i++) { const e=document.createElement('div'); e.className='date-cell disabled'; grid.appendChild(e); }
-    for (let d=1;d<=lastDate;d++) {
-        const ds = `${voteYear}-${String(voteMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const cd = new Date(voteYear,voteMonth,d);
-        const isPast  = cd<today;
-        const isToday = cd.getTime()===today.getTime();
-        const isSel   = ds in selectedDates;
-        const cell = document.createElement('div');
-        cell.className = `date-cell${isPast?' disabled':isSel?' selected':isToday?' today':''}`;
-        cell.textContent = d;
-        if (!isPast) cell.onclick = () => toggleDateSelect(ds,cell);
-        grid.appendChild(cell);
-    }
-    renderSelectedDatesList();
+// 월 레이블 초기 렌더
+updateVoteMonthLabel();
+function updateVoteMonthLabel() {
+    const el = document.getElementById('vote-month-label');
+    if(el) el.textContent = `${voteYear}년 ${voteMonth+1}월`;
 }
-
 window.changeVoteMonth = dir => {
     voteMonth+=dir;
     if(voteMonth>11){voteMonth=0;voteYear++;}
     if(voteMonth<0){voteMonth=11;voteYear--;}
-    renderVoteCal();
+    updateVoteMonthLabel();
 };
 
-function toggleDateSelect(ds, cell) {
-    if (ds in selectedDates) {
-        delete selectedDates[ds];
-        cell.classList.remove('selected');
-        const d=new Date(ds); if(d.getTime()===new Date().setHours(0,0,0,0)) cell.classList.add('today');
-    } else {
-        selectedDates[ds]='14:00';
-        cell.classList.add('selected'); cell.classList.remove('today');
-    }
-    renderSelectedDatesList();
-}
-
-function renderSelectedDatesList() {
-    const c = document.getElementById('selected-dates-list');
-    const dates = Object.keys(selectedDates).sort();
-    if (!dates.length) { c.innerHTML='<p class="text-xs text-gray-400 text-center py-2">위에서 날짜를 선택하세요</p>'; return; }
-    const DAY=['일','월','화','수','목','금','토'];
-    const times=[];
-    for(let h=9;h<=22;h++){['00','30'].forEach(m=>times.push(`${String(h).padStart(2,'0')}:${m}`));}
-    c.innerHTML='';
-    dates.forEach(ds => {
-        const [,mm,dd]=ds.split('-');
-        const dn=DAY[new Date(ds).getDay()];
-        const row=document.createElement('div');
-        row.className='flex items-center justify-between bg-blue-50 rounded-xl px-3 py-2 mb-1.5';
-        row.innerHTML=`
-            <span class="text-xs font-bold text-blue-800">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</span>
-            <select onchange="selectedDates['${ds}']=this.value" class="text-xs border border-blue-200 rounded-lg px-2 py-1 bg-white text-blue-700 font-bold">
-                ${times.map(t=>`<option value="${t}" ${selectedDates[ds]===t?'selected':''}>${t}</option>`).join('')}
-            </select>`;
-        c.appendChild(row);
-    });
-}
-
+// ── 리더: 수렴 시작 ──
 window.createVote = async () => {
-    const dates=Object.keys(selectedDates).sort();
-    if (!dates.length) return toast('날짜를 선택하세요','warn');
-    const options=dates.map(d=>({date:d,time:selectedDates[d]}));
-    const msg=document.getElementById('vote-message').value.trim();
+    const msg = document.getElementById('vote-message').value.trim();
+    const targetMonth = `${voteYear}-${String(voteMonth+1).padStart(2,'0')}`;
     // 기존 투표 삭제
-    const existing=await getDocs(collection(db,'usan_vote'));
+    const existing = await getDocs(collection(db,'usan_vote'));
     for(const d of existing.docs) await deleteDoc(d.ref);
-    await addDoc(collection(db,'usan_vote'),{options,message:msg,votes:{},confirmed:false,createdAt:serverTimestamp()});
-    // 공지로 투표 알림
-    await addDoc(collection(db,'usan_notices'),{
-        title:'📅 합주 날짜 투표가 시작됐습니다!',
-        body: msg||'스케줄 탭에서 가능한 날짜를 선택해주세요.',
+    // 새 투표 생성 (날짜 없이, 멤버가 직접 채움)
+    await addDoc(collection(db,'usan_vote'), {
+        targetMonth, message:msg,
+        responses:{},           // { 'PART': [{date,from,to}, ...] }
+        confirmedDates:[],      // 확정된 날짜 목록 [{date,time}]
+        status:'open',          // open | confirmed
+        createdAt: serverTimestamp()
+    });
+    // 공지 자동 등록
+    await addDoc(collection(db,'usan_notices'), {
+        title: `📅 ${voteYear}년 ${voteMonth+1}월 합주 날짜 수렴을 시작합니다!`,
+        body: msg || '스케줄 탭에서 가능한 날짜와 시간대를 입력해주세요.',
         important:true, auto:true, createdAt:serverTimestamp()
     });
-    selectedDates={}; renderVoteCal();
     document.getElementById('vote-message').value='';
-    toast('투표 시작! 공지로 알렸습니다 📢','ok');
+    toast('수렴 시작! 멤버에게 공지했습니다 📢','ok');
 };
 
+// ── 실시간 구독 ──
 onSnapshot(collection(db,'usan_vote'), snap => {
-    if(snap.empty){renderNoVote();return;}
-    currentVoteId=snap.docs[0].id;
+    if(snap.empty){ renderNoVote(); return; }
+    currentVoteId = snap.docs[0].id;
     renderVote(snap.docs[0].data());
 });
 
 function renderNoVote() {
-    document.getElementById('vote-options').innerHTML='<p class="text-gray-400 text-sm text-center py-4">진행 중인 투표가 없습니다</p>';
-    document.getElementById('vote-status-badge').textContent='대기 중';
-    document.getElementById('submit-vote-btn').classList.add('hidden');
+    document.getElementById('vote-empty-msg').classList.remove('hidden');
+    document.getElementById('vote-member-section').classList.add('hidden');
     document.getElementById('vote-result-panel').classList.add('hidden');
-    document.getElementById('confirmed-schedule').classList.add('hidden');
+    document.getElementById('vote-status-badge').textContent = '대기 중';
+    document.getElementById('confirmed-schedule-wrap').innerHTML = '';
+    document.getElementById('dday-content').innerHTML =
+        '<p class="text-gray-400 text-sm text-center py-2">확정된 합주 일정이 없습니다</p>';
 }
 
 function renderVote(data) {
-    if (data.confirmed) {
-        document.getElementById('confirmed-schedule').classList.remove('hidden');
-        document.getElementById('confirmed-date-text').textContent = fmtDate(data.confirmedDate,data.confirmedTime);
-        renderDday(data.confirmedDate,data.confirmedTime);
-        document.getElementById('vote-options').innerHTML='<p class="text-green-600 text-sm text-center py-2 font-bold">✅ 합주일 확정!</p>';
-        document.getElementById('vote-status-badge').textContent='확정';
-        document.getElementById('submit-vote-btn').classList.add('hidden');
+    document.getElementById('vote-empty-msg').classList.add('hidden');
+    const [yr,mo] = (data.targetMonth||'').split('-');
+    const responses = data.responses || {};
+    const confirmedDates = data.confirmedDates || [];
+    const status = data.status || 'open';
+
+    // 확정 일정 표시 (복수)
+    renderConfirmedDates(confirmedDates, data);
+
+    if(status === 'confirmed') {
+        document.getElementById('vote-status-badge').textContent = `${confirmedDates.length}회 확정`;
+        document.getElementById('vote-member-section').classList.add('hidden');
         document.getElementById('vote-result-panel').classList.add('hidden');
-        // 리더에게만 수정·재투표 버튼 표시
-        if (myRole==='leader') {
-            document.getElementById('confirmed-leader-btns').classList.remove('hidden');
-            document.getElementById('confirmed-leader-btns').style.display='flex';
-        }
+        // 리더에게만 재수렴 버튼
+        if(myRole==='leader') renderLeaderConfirmedTools();
         return;
     }
 
-    const options=data.options||[];
-    const votes=data.votes||{};
-    const total=data.totalMembers||5;
-    document.getElementById('vote-status-badge').textContent=`투표중 · ${options.length}개 후보`;
-    document.getElementById('submit-vote-btn').classList.remove('hidden');
-    const DAY=['일','월','화','수','목','금','토'];
+    document.getElementById('vote-status-badge').textContent =
+        `수렴중 · ${parseInt(mo)}월 · ${Object.keys(responses).length}명 응답`;
 
-    // 멤버 체크 UI
-    const container=document.getElementById('vote-options');
-    container.innerHTML='';
-    myVotedIndices=[];
-    options.forEach((opt,i) => {
-        const voters=votes[i]||[];
-        const count=voters.length;
-        const pct=Math.round(count/Math.max(total,1)*100);
-        const isMine=voters.includes(myPart);
-        if(isMine) myVotedIndices.push(i);
-        const [,mm,dd]=opt.date.split('-');
-        const dn=DAY[new Date(opt.date).getDay()];
-        const div=document.createElement('div');
-        div.className=`border rounded-xl p-3 mb-1.5 ${isMine?'border-blue-400 bg-blue-50':'border-gray-200'}`;
-        div.innerHTML=`
-            <div class="flex items-center gap-2.5 mb-1.5">
-                <input type="checkbox" id="vcb-${i}" ${isMine?'checked':''} onchange="toggleVote(${i})">
-                <div class="flex-1">
-                    <p class="text-sm font-bold text-gray-800">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</p>
-                    <p class="text-xs text-gray-400">${opt.time} 시작</p>
-                </div>
-                <span class="text-xs font-bold text-blue-600 flex-none">${count}명 가능</span>
-            </div>
-            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-400 rounded-full" style="width:${pct}%;transition:width .4s"></div>
-            </div>
-            <p class="text-xs text-gray-400 mt-1">${voters.join(', ')||'아직 없음'}</p>`;
-        container.appendChild(div);
-    });
+    // ── 멤버 뷰: 달력으로 날짜+시간범위 선택 ──
+    document.getElementById('vote-member-section').classList.remove('hidden');
+    renderMemberCalendar(data, yr, mo, responses);
 
-    // 리더 결과 패널
-    if (myRole==='leader') {
+    // ── 리더 뷰: 취합 결과 ──
+    if(myRole==='leader') {
         document.getElementById('vote-result-panel').classList.remove('hidden');
         document.getElementById('confirm-vote-btn').classList.remove('hidden');
-        const resultList=document.getElementById('vote-result-list');
-        resultList.innerHTML='';
-        // 득표 순 정렬
-        const sorted=[...options.map((o,i)=>({...o,i,count:(votes[i]||[]).length}))].sort((a,b)=>b.count-a.count);
-        sorted.forEach((o,rank) => {
-            const [,mm,dd]=o.date.split('-');
-            const dn=DAY[new Date(o.date).getDay()];
-            const row=document.createElement('div');
-            row.className=`flex justify-between items-center py-1 ${rank===0?'font-bold text-blue-700':'text-gray-600'}`;
-            row.innerHTML=`
-                <span class="text-xs">${rank===0?'🥇':rank===1?'🥈':'🥉'} ${parseInt(mm)}월 ${parseInt(dd)}일 (${dn}) ${o.time}</span>
-                <span class="text-xs font-bold">${o.count}명</span>`;
-            resultList.appendChild(row);
-        });
-        // 확정 버튼에 1위 날짜 바인딩
-        document.getElementById('confirm-vote-btn').onclick = () => confirmVote(sorted[0]);
+        renderLeaderResult(responses, yr, mo);
+    } else {
+        document.getElementById('vote-result-panel').classList.add('hidden');
     }
 }
 
-window.toggleVote = idx => {
-    myVotedIndices = myVotedIndices.includes(idx)
-        ? myVotedIndices.filter(v=>v!==idx)
-        : [...myVotedIndices,idx];
-};
+// ── 멤버: 달력 + 시간범위 선택 UI ──
+function renderMemberCalendar(data, yr, mo, responses) {
+    const container = document.getElementById('vote-member-list');
+    container.innerHTML = '';
 
+    // 내 기존 응답 복원
+    const myResponse = responses[myPart] || [];
+    myAvailDates = {};
+    myResponse.forEach(r => { myAvailDates[r.date] = {from:r.from, to:r.to}; });
+
+    // 달력 그리기
+    const calYear  = parseInt(yr);
+    const calMonth = parseInt(mo)-1;
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    const calWrap = document.createElement('div');
+    calWrap.innerHTML = `
+        <p class="text-xs font-bold text-gray-600 mb-2">${parseInt(mo)}월 달력에서 가능한 날짜를 탭하세요</p>
+        <div class="grid grid-cols-7 gap-0.5 mb-1">
+            <div class="text-center text-xs text-red-400 py-1">일</div>
+            <div class="text-center text-xs text-gray-400 py-1">월</div>
+            <div class="text-center text-xs text-gray-400 py-1">화</div>
+            <div class="text-center text-xs text-gray-400 py-1">수</div>
+            <div class="text-center text-xs text-gray-400 py-1">목</div>
+            <div class="text-center text-xs text-gray-400 py-1">금</div>
+            <div class="text-center text-xs text-blue-400 py-1">토</div>
+        </div>
+        <div id="member-cal-grid" class="grid grid-cols-7 gap-0.5 mb-3"></div>
+        <div id="member-time-list" class="space-y-2"></div>`;
+    container.appendChild(calWrap);
+
+    const grid = document.getElementById('member-cal-grid');
+    for(let i=0;i<firstDay;i++){const e=document.createElement('div');e.className='date-cell disabled';grid.appendChild(e);}
+    for(let d=1;d<=lastDate;d++){
+        const ds = `${yr}-${mo}-${String(d).padStart(2,'0')}`;
+        const cd = new Date(calYear,calMonth,d);
+        const isPast  = cd < today;
+        const isToday = cd.getTime()===today.getTime();
+        const isSel   = ds in myAvailDates;
+        const cell = document.createElement('div');
+        cell.id = `mcell-${ds}`;
+        cell.className = `date-cell${isPast?' disabled':isSel?' selected':isToday?' today':''}`;
+        cell.textContent = d;
+        if(!isPast) cell.onclick = () => toggleMemberDate(ds, cell);
+        grid.appendChild(cell);
+    }
+    renderMemberTimeList();
+}
+
+function toggleMemberDate(ds, cell) {
+    if(ds in myAvailDates){
+        delete myAvailDates[ds];
+        cell.classList.remove('selected');
+        const d=new Date(ds); if(d.getTime()===new Date().setHours(0,0,0,0)) cell.classList.add('today');
+    } else {
+        myAvailDates[ds] = {from:'13:00', to:'18:00'};
+        cell.classList.add('selected'); cell.classList.remove('today');
+    }
+    renderMemberTimeList();
+}
+
+function renderMemberTimeList() {
+    const list = document.getElementById('member-time-list');
+    if(!list) return;
+    const dates = Object.keys(myAvailDates).sort();
+    if(!dates.length){
+        list.innerHTML='<p class="text-xs text-gray-400 text-center py-2">날짜를 선택하면 시간 범위를 설정할 수 있습니다</p>';
+        return;
+    }
+    list.innerHTML='';
+    dates.forEach(ds => {
+        const [,mm,dd]=ds.split('-');
+        const dn=DAY[new Date(ds).getDay()];
+        const {from,to} = myAvailDates[ds];
+        const row = document.createElement('div');
+        row.className='bg-blue-50 rounded-xl px-3 py-2.5';
+        row.innerHTML=`
+            <p class="text-xs font-bold text-blue-800 mb-2">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</p>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-blue-600 w-8">시작</span>
+                <select onchange="myAvailDates['${ds}'].from=this.value;renderMemberTimeList()" class="flex-1 text-xs border border-blue-200 rounded-lg px-2 py-1.5 bg-white text-blue-700 font-bold">
+                    ${TIMES.map(t=>`<option value="${t}" ${from===t?'selected':''}>${t}</option>`).join('')}
+                </select>
+                <span class="text-xs text-blue-400">~</span>
+                <select onchange="myAvailDates['${ds}'].to=this.value;renderMemberTimeList()" class="flex-1 text-xs border border-blue-200 rounded-lg px-2 py-1.5 bg-white text-blue-700 font-bold">
+                    ${TIMES.map(t=>`<option value="${t}" ${to===t?'selected':''}>${t}</option>`).join('')}
+                </select>
+                <span class="text-xs text-blue-600 w-8">종료</span>
+            </div>`;
+        list.appendChild(row);
+    });
+}
+
+// 제출
 document.getElementById('submit-vote-btn').addEventListener('click', async () => {
-    if (!currentVoteId) return;
-    const ref=doc(db,'usan_vote',currentVoteId);
-    const snap=await getDoc(ref);
-    const votes={...(snap.data().votes||{})};
-    Object.keys(votes).forEach(k=>{votes[k]=(votes[k]||[]).filter(p=>p!==myPart);});
-    myVotedIndices.forEach(i=>{if(!votes[i])votes[i]=[];votes[i].push(myPart);});
-    await updateDoc(ref,{votes});
-    toast('제출 완료! 리더가 결과를 확인합니다.','ok');
-    myVotedIndices=[];
+    if(!currentVoteId) return;
+    const arr = Object.entries(myAvailDates).map(([date,{from,to}])=>({date,from,to}));
+    await updateDoc(doc(db,'usan_vote',currentVoteId), {
+        [`responses.${myPart}`]: arr
+    });
+    toast('제출 완료! 리더가 취합 중입니다.','ok');
 });
 
-async function confirmVote(opt) {
-    const DAY=['일','월','화','수','목','금','토'];
-    const [,mm,dd]=opt.date.split('-');
-    const dn=DAY[new Date(opt.date).getDay()];
-    const label=`${parseInt(mm)}월 ${parseInt(dd)}일 (${dn}) ${opt.time}`;
-    if(!confirm(`"${label}"으로 최종 확정할까요?`)) return;
-    await updateDoc(doc(db,'usan_vote',currentVoteId),{confirmed:true,confirmedDate:opt.date,confirmedTime:opt.time});
+// ── 리더: 취합 결과 UI ──
+function renderLeaderResult(responses, yr, mo) {
+    const list = document.getElementById('vote-result-list');
+    list.innerHTML='';
+    leaderPickedDates.clear();
+
+    // 날짜별로 응답 집계
+    const dateMap = {}; // { 'YYYY-MM-DD': [{part, from, to}] }
+    Object.entries(responses).forEach(([part, arr]) => {
+        arr.forEach(r => {
+            if(!dateMap[r.date]) dateMap[r.date]=[];
+            dateMap[r.date].push({part, from:r.from, to:r.to});
+        });
+    });
+
+    if(!Object.keys(dateMap).length){
+        list.innerHTML='<p class="text-xs text-gray-400 text-center py-2">아직 응답이 없습니다</p>';
+        document.getElementById('confirm-vote-btn').classList.add('hidden');
+        return;
+    }
+
+    // 날짜 순 정렬, 카드 생성
+    Object.keys(dateMap).sort().forEach(ds => {
+        const entries = dateMap[ds];
+        const [,mm,dd]=ds.split('-');
+        const dn=DAY[new Date(ds).getDay()];
+        const card = document.createElement('div');
+        card.id=`result-card-${ds}`;
+        card.className='border border-gray-200 rounded-xl p-3 cursor-pointer transition-all';
+        card.style.userSelect='none';
+
+        // 겹치는 시간대 계산
+        const fromMins = entries.map(e=>toMin(e.from));
+        const toMins   = entries.map(e=>toMin(e.to));
+        const overlapFrom = Math.max(...fromMins);
+        const overlapTo   = Math.min(...toMins);
+        const hasOverlap  = overlapFrom < overlapTo;
+
+        const memberLines = entries.map(e=>`<span class="inline-block text-xs bg-blue-100 text-blue-700 rounded px-1.5 py-0.5 mr-1 mb-1">${e.part} ${e.from}~${e.to}</span>`).join('');
+        const overlapBadge = hasOverlap
+            ? `<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-lg">겹침 ${fromMin(overlapFrom)}~${fromMin(overlapTo)}</span>`
+            : `<span class="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-lg">겹치는 시간 없음</span>`;
+
+        card.innerHTML=`
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="lpick-${ds}" onchange="toggleLeaderPick('${ds}',this.checked)" class="rounded">
+                    <p class="text-sm font-bold text-gray-800">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn})</p>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs text-gray-500">${entries.length}명</span>
+                    ${overlapBadge}
+                </div>
+            </div>
+            <div class="flex flex-wrap mt-1">${memberLines}</div>
+            <div id="time-pick-${ds}" class="hidden mt-2 pt-2 border-t border-gray-100">
+                <p class="text-xs text-gray-500 mb-1.5">확정 시간 선택</p>
+                <div class="flex items-center gap-2">
+                    <select id="confirm-time-${ds}" class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 font-bold">
+                        ${TIMES.map(t=>`<option value="${t}" ${t==='14:00'?'selected':''}>${t}</option>`).join('')}
+                    </select>
+                    <span class="text-xs text-gray-400">시작</span>
+                </div>
+            </div>`;
+        list.appendChild(card);
+    });
+
+    document.getElementById('confirm-vote-btn').onclick = confirmLeaderPick;
+}
+
+window.toggleLeaderPick = (ds, checked) => {
+    const timePickEl = document.getElementById(`time-pick-${ds}`);
+    const card = document.getElementById(`result-card-${ds}`);
+    if(checked){
+        leaderPickedDates.add(ds);
+        card.classList.add('border-green-400','bg-green-50');
+        card.classList.remove('border-gray-200');
+        timePickEl.classList.remove('hidden');
+    } else {
+        leaderPickedDates.delete(ds);
+        card.classList.remove('border-green-400','bg-green-50');
+        card.classList.add('border-gray-200');
+        timePickEl.classList.add('hidden');
+    }
+};
+
+async function confirmLeaderPick() {
+    if(!leaderPickedDates.size) return toast('확정할 날짜를 선택하세요','warn');
+    const picks = [...leaderPickedDates].sort().map(ds => {
+        const time = document.getElementById(`confirm-time-${ds}`)?.value || '14:00';
+        return {date:ds, time};
+    });
+    const labels = picks.map(p => {
+        const [,mm,dd]=p.date.split('-');
+        return `${parseInt(mm)}/${parseInt(dd)} ${p.time}`;
+    }).join(', ');
+    if(!confirm(`다음 날짜로 합주를 확정할까요?
+${labels}`)) return;
+
+    await updateDoc(doc(db,'usan_vote',currentVoteId), {
+        confirmedDates: picks,
+        status:'confirmed'
+    });
     // 확정 공지
     await addDoc(collection(db,'usan_notices'),{
-        title:`✅ 합주일 확정: ${label}`,
+        title:`✅ 합주 확정: ${labels}`,
         body:'스케줄에 자동 등록됐습니다. 참석 부탁드려요!',
         important:true, auto:true, createdAt:serverTimestamp()
     });
-    toast('합주일 확정! 공지로 알렸습니다 🎉','ok');
+    leaderPickedDates.clear();
+    toast('합주 확정! 공지로 알렸습니다 🎉','ok');
 }
+
+// ── 확정 일정 목록 렌더 ──
+function renderConfirmedDates(confirmedDates, data) {
+    const wrap = document.getElementById('confirmed-schedule-wrap');
+    wrap.innerHTML='';
+    if(!confirmedDates.length) {
+        // D-day 카드 초기화
+        document.getElementById('dday-content').innerHTML='<p class="text-gray-400 text-sm text-center py-2">확정된 합주 일정이 없습니다</p>';
+        return;
+    }
+    // 가장 가까운 날짜 D-day
+    const today=new Date();today.setHours(0,0,0,0);
+    const upcoming=confirmedDates.filter(p=>new Date(p.date)>=today).sort((a,b)=>a.date.localeCompare(b.date));
+    if(upcoming.length) renderDday(upcoming[0].date, upcoming[0].time);
+
+    // 전체 목록 카드
+    confirmedDates.forEach(p=>{
+        const [,mm,dd]=p.date.split('-');
+        const dn=DAY[new Date(p.date).getDay()];
+        const diff=Math.round((new Date(p.date)-today)/86400000);
+        const ddLabel=diff>0?`D-${diff}`:diff===0?'D-Day':'지남';
+        const card=document.createElement('div');
+        card.className='bg-green-50 border border-green-200 rounded-2xl p-4';
+        card.innerHTML=`
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-xs font-bold text-green-600 mb-0.5">✅ 확정된 합주</p>
+                    <p class="text-sm font-bold text-green-800">${parseInt(mm)}월 ${parseInt(dd)}일 (${dn}) ${p.time} 시작</p>
+                    <p id="confirmed-studio-text" class="text-xs text-green-600 mt-0.5"></p>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-xl font-bold text-green-600">${ddLabel}</span>
+                    ${myRole==='leader'?`<button onclick="resetVote()" class="text-xs text-red-400 border border-red-200 bg-white px-2 py-0.5 rounded-lg">↩ 재수렴</button>`:''}
+                </div>
+            </div>`;
+        wrap.appendChild(card);
+    });
+    // 합주실 정보 업데이트
+    const stEl = document.querySelector('#confirmed-studio-text');
+    if(stEl && studioNameCache) stEl.textContent=studioNameCache;
+}
+
+function renderLeaderConfirmedTools() {
+    // 이미 renderConfirmedDates에서 버튼 포함됨
+}
+
+// ── 재수렴 ──
+window.resetVote = async () => {
+    if(!confirm('확정을 취소하고 날짜 수렴을 다시 시작할까요?')) return;
+    if(!currentVoteId) return;
+    await deleteDoc(doc(db,'usan_vote',currentVoteId));
+    toast('초기화됐습니다. 새 수렴을 시작해주세요.','warn');
+};
+
+// 시간 유틸
+function toMin(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
+function fromMin(m){ return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
 
 // ── 투표 재시작 (리더) ──
 window.resetVote = async () => {
