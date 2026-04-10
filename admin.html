@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -33,49 +34,53 @@
         .badge-used { background: #374151; color: #9ca3af; }
         .badge-fresh { background: #14532d; color: #86efac; }
 
-        /* 악기 선택 버튼 */
-        .instrument-btn {
-            background: #0f172a; border: 1px solid #334155; color: #94a3b8;
-            border-radius: .65rem; padding: .5rem .75rem; font-size: .8rem;
-            font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap;
-        }
-        .instrument-btn.selected {
-            background: #1e3a8a; border-color: #3b82f6; color: #93c5fd;
-        }
-        .instrument-btn:hover:not(.selected) { border-color: #475569; color: #cbd5e1; }
+```
+    /* 악기 선택 버튼 */
+    .instrument-btn {
+        background: #0f172a; border: 1px solid #334155; color: #94a3b8;
+        border-radius: .65rem; padding: .5rem .75rem; font-size: .8rem;
+        font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .instrument-btn.selected {
+        background: #1e3a8a; border-color: #3b82f6; color: #93c5fd;
+    }
+    .instrument-btn:hover:not(.selected) { border-color: #475569; color: #cbd5e1; }
 
-        /* 생성된 초대코드 카드 */
-        .invite-code-card {
-            background: #0f172a; border: 1px solid #1e40af;
-            border-radius: .75rem; padding: .75rem 1rem;
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: .5rem;
-        }
-        .code-text { font-family: monospace; font-size: .95rem; color: #60a5fa; font-weight: 700; letter-spacing: .05em; }
-        .code-part { font-size: .7rem; color: #64748b; margin-top: .1rem; }
+    /* 생성된 초대코드 카드 */
+    .invite-code-card {
+        background: #0f172a; border: 1px solid #1e40af;
+        border-radius: .75rem; padding: .75rem 1rem;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: .5rem;
+    }
+    .code-text { font-family: monospace; font-size: .95rem; color: #60a5fa; font-weight: 700; letter-spacing: .05em; }
+    .code-part { font-size: .7rem; color: #64748b; margin-top: .1rem; }
 
-        /* 멤버 리스트 */
-        .member-row {
-            background: #0f172a; border-radius: .65rem; padding: .6rem .85rem;
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: .4rem;
-        }
+    /* 멤버 리스트 */
+    .member-row {
+        background: #0f172a; border-radius: .65rem; padding: .6rem .85rem;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: .4rem;
+    }
 
-        /* 탭 네비 */
-        .tab-nav-btn { flex: 1; padding: .5rem .25rem; font-size: .75rem; font-weight: 700; border-radius: .5rem; color: #64748b; cursor: pointer; border: none; background: transparent; transition: all .15s; }
-        .tab-nav-btn.active { background: #2563eb; color: #fff; }
+    /* 탭 네비 */
+    .tab-nav-btn { flex: 1; padding: .5rem .25rem; font-size: .75rem; font-weight: 700; border-radius: .5rem; color: #64748b; cursor: pointer; border: none; background: transparent; transition: all .15s; }
+    .tab-nav-btn.active { background: #2563eb; color: #fff; }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
-        .toast { position: fixed; top: 1.25rem; left: 50%; transform: translateX(-50%); padding: .6rem 1.25rem; border-radius: .75rem; font-size: .8rem; font-weight: 700; z-index: 999; white-space: nowrap; pointer-events: none; }
-    </style>
+    .toast { position: fixed; top: 1.25rem; left: 50%; transform: translateX(-50%); padding: .6rem 1.25rem; border-radius: .75rem; font-size: .8rem; font-weight: 700; z-index: 999; white-space: nowrap; pointer-events: none; }
+</style>
+```
+
 </head>
 <body class="min-h-screen pb-10">
 
 <!-- ════════════════════════════════
      로그인 화면
 ════════════════════════════════ -->
+
 <div id="login-screen" class="flex items-center justify-center min-h-screen p-5">
     <div class="w-full max-w-xs space-y-5">
         <div class="text-center">
@@ -103,230 +108,234 @@
 <!-- ════════════════════════════════
      관리자 대시보드
 ════════════════════════════════ -->
+
 <div id="admin-dash" class="hidden max-w-md mx-auto p-4 pt-5">
 
-    <!-- 헤더 -->
-    <div class="flex items-center justify-between mb-4">
-        <div>
-            <p class="text-xs text-blue-400 font-bold tracking-widest">SYSTEM ADMIN</p>
-            <h1 class="text-base font-bold text-white leading-tight">우산속밴드 관리 콘솔</h1>
+```
+<!-- 헤더 -->
+<div class="flex items-center justify-between mb-4">
+    <div>
+        <p class="text-xs text-blue-400 font-bold tracking-widest">SYSTEM ADMIN</p>
+        <h1 class="text-base font-bold text-white leading-tight">우산속밴드 관리 콘솔</h1>
+    </div>
+    <button onclick="adminLogout()" class="text-xs text-slate-500 border border-slate-700 px-3 py-1.5 rounded-xl">로그아웃</button>
+</div>
+
+<!-- 탭 네비 -->
+<div class="flex gap-1 bg-slate-800 p-1 rounded-xl mb-5">
+    <button onclick="switchTab('band')"    id="tn-band"    class="tab-nav-btn active">🎸 밴드 설정</button>
+    <button onclick="switchTab('invites')" id="tn-invites" class="tab-nav-btn">📨 초대코드</button>
+    <button onclick="switchTab('members')" id="tn-members" class="tab-nav-btn">👥 멤버</button>
+    <button onclick="switchTab('system')"  id="tn-system"  class="tab-nav-btn">⚙️ 시스템</button>
+</div>
+
+<!-- ──────────────────────────────
+     탭 ① 밴드 설정
+────────────────────────────── -->
+<div id="tab-band" class="tab-section active">
+
+    <!-- 밴드 기본 정보 -->
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-3">🎵 밴드 기본 정보</p>
+        <div class="field">
+            <label>밴드명</label>
+            <input type="text" id="band-name" placeholder="예: 우산속밴드">
         </div>
-        <button onclick="adminLogout()" class="text-xs text-slate-500 border border-slate-700 px-3 py-1.5 rounded-xl">로그아웃</button>
+        <div class="field">
+            <label>지역</label>
+            <select id="band-region">
+                <optgroup label="특별시 / 광역시">
+                <option value="SE">서울특별시 (SE)</option>
+                <option value="BS">부산광역시 (BS)</option>
+                <option value="DG">대구광역시 (DG)</option>
+                <option value="IC">인천광역시 (IC)</option>
+                <option value="GJ">광주광역시 (GJ)</option>
+                <option value="DJ">대전광역시 (DJ)</option>
+                <option value="US">울산광역시 (US)</option>
+                <option value="SJ">세종특별자치시 (SJ)</option>
+                </optgroup>
+                <optgroup label="도">
+                <option value="GG">경기도 (GG)</option>
+                <option value="GW">강원특별자치도 (GW)</option>
+                <option value="CB">충청북도 (CB)</option>
+                <option value="CN">충청남도 (CN)</option>
+                <option value="JB">전북특별자치도 (JB)</option>
+                <option value="JN">전라남도 (JN)</option>
+                <option value="GB">경상북도 (GB)</option>
+                <option value="GN">경상남도 (GN)</option>
+                <option value="JJ">제주특별자치도 (JJ)</option>
+                </optgroup>
+                <optgroup label="기타">
+                <option value="ETC">기타 (ETC)</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="field">
+            <label>합주실 이름</label>
+            <input type="text" id="studio-name" placeholder="예: 홍대 스튜디오 A">
+        </div>
+        <div class="field">
+            <label>합주실 주소</label>
+            <input type="text" id="studio-addr" placeholder="예: 서울 마포구 ...">
+        </div>
+
+        <!-- 밴드 고유코드 표시 -->
+        <div style="background:#0f172a;border:1px solid #1e40af;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.85rem;">
+            <p class="text-xs text-slate-500 mb-1">밴드 고유코드 <span class="text-blue-400">(자동 생성)</span></p>
+            <p id="band-code-display" class="font-mono text-blue-400 font-bold text-lg tracking-widest">—</p>
+            <p class="text-xs text-slate-600 mt-1">지역코드 + 생성연월 + 4자리 난수</p>
+        </div>
+
+        <button onclick="saveBandInfo()" class="btn btn-primary">밴드 정보 저장 / 코드 생성</button>
     </div>
 
-    <!-- 탭 네비 -->
-    <div class="flex gap-1 bg-slate-800 p-1 rounded-xl mb-5">
-        <button onclick="switchTab('band')"    id="tn-band"    class="tab-nav-btn active">🎸 밴드 설정</button>
-        <button onclick="switchTab('invites')" id="tn-invites" class="tab-nav-btn">📨 초대코드</button>
-        <button onclick="switchTab('members')" id="tn-members" class="tab-nav-btn">👥 멤버</button>
-        <button onclick="switchTab('system')"  id="tn-system"  class="tab-nav-btn">⚙️ 시스템</button>
+    <!-- 악기 구성 멤버 설정 -->
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-1">🎹 악기 구성 설정</p>
+        <p class="text-xs text-slate-500 mb-3">버튼을 눌러 멤버 파트를 추가하세요. 같은 악기를 여러 번 누르면 2번, 3번 파트가 생성됩니다.</p>
+
+        <!-- 기본 악기 버튼 -->
+        <div class="flex flex-wrap gap-2 mb-3">
+            <button class="instrument-btn" onclick="addInstrument('VOCAL')">🎤 보컬</button>
+            <button class="instrument-btn" onclick="addInstrument('GUITAR')">🎸 기타</button>
+            <button class="instrument-btn" onclick="addInstrument('BASS')">🎸 베이스</button>
+            <button class="instrument-btn" onclick="addInstrument('DRUM')">🥁 드럼</button>
+            <button class="instrument-btn" onclick="addInstrument('KEY')">🎹 키보드</button>
+            <button class="instrument-btn" onclick="addInstrument('PIANO')">🎹 피아노</button>
+            <button class="instrument-btn" onclick="addInstrument('VIOLIN')">🎻 바이올린</button>
+            <button class="instrument-btn" onclick="addInstrument('SAX')">🎷 색소폰</button>
+            <button class="instrument-btn" onclick="addInstrument('TRUMPET')">🎺 트럼펫</button>
+            <button class="instrument-btn" onclick="addInstrument('HARMONICA')">🪗 하모니카</button>
+        </div>
+
+        <!-- 직접 입력 -->
+        <div class="flex gap-2 mb-4">
+            <input type="text" id="custom-instrument" placeholder="특수 악기 직접 입력 (영문)" style="border-radius:.65rem;padding:.45rem .85rem;font-size:.8rem;">
+            <button onclick="addCustomInstrument()" style="background:#1e3a8a;color:#93c5fd;border:1px solid #3b82f6;border-radius:.65rem;padding:.45rem .85rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
+        </div>
+
+        <!-- 선택된 파트 목록 -->
+        <div class="mb-3">
+            <p class="text-xs text-slate-500 mb-2">구성된 파트 <span id="part-count" class="text-blue-400">0명</span></p>
+            <div id="selected-parts" class="space-y-1.5"></div>
+            <p id="no-parts-msg" class="text-xs text-slate-600 text-center py-3">악기를 선택해주세요</p>
+        </div>
+
+        <button onclick="saveInstruments()" class="btn btn-success">악기 구성 저장</button>
     </div>
+</div>
 
-    <!-- ──────────────────────────────
-         탭 ① 밴드 설정
-    ────────────────────────────── -->
-    <div id="tab-band" class="tab-section active">
+<!-- ──────────────────────────────
+     탭 ② 초대코드
+────────────────────────────── -->
+<div id="tab-invites" class="tab-section">
 
-        <!-- 밴드 기본 정보 -->
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-3">🎵 밴드 기본 정보</p>
-            <div class="field">
-                <label>밴드명</label>
-                <input type="text" id="band-name" placeholder="예: 우산속밴드">
-            </div>
-            <div class="field">
-                <label>지역</label>
-                <select id="band-region">
-                    <optgroup label="특별시 / 광역시">
-                    <option value="SE">서울특별시 (SE)</option>
-                    <option value="BS">부산광역시 (BS)</option>
-                    <option value="DG">대구광역시 (DG)</option>
-                    <option value="IC">인천광역시 (IC)</option>
-                    <option value="GJ">광주광역시 (GJ)</option>
-                    <option value="DJ">대전광역시 (DJ)</option>
-                    <option value="US">울산광역시 (US)</option>
-                    <option value="SJ">세종특별자치시 (SJ)</option>
-                    </optgroup>
-                    <optgroup label="도">
-                    <option value="GG">경기도 (GG)</option>
-                    <option value="GW">강원특별자치도 (GW)</option>
-                    <option value="CB">충청북도 (CB)</option>
-                    <option value="CN">충청남도 (CN)</option>
-                    <option value="JB">전북특별자치도 (JB)</option>
-                    <option value="JN">전라남도 (JN)</option>
-                    <option value="GB">경상북도 (GB)</option>
-                    <option value="GN">경상남도 (GN)</option>
-                    <option value="JJ">제주특별자치도 (JJ)</option>
-                    </optgroup>
-                    <optgroup label="기타">
-                    <option value="ETC">기타 (ETC)</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="field">
-                <label>합주실 이름</label>
-                <input type="text" id="studio-name" placeholder="예: 홍대 스튜디오 A">
-            </div>
-            <div class="field">
-                <label>합주실 주소</label>
-                <input type="text" id="studio-addr" placeholder="예: 서울 마포구 ...">
-            </div>
-
-            <!-- 밴드 고유코드 표시 -->
-            <div style="background:#0f172a;border:1px solid #1e40af;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.85rem;">
-                <p class="text-xs text-slate-500 mb-1">밴드 고유코드 <span class="text-blue-400">(자동 생성)</span></p>
-                <p id="band-code-display" class="font-mono text-blue-400 font-bold text-lg tracking-widest">—</p>
-                <p class="text-xs text-slate-600 mt-1">지역코드 + 생성연월 + 4자리 난수</p>
-            </div>
-
-            <button onclick="saveBandInfo()" class="btn btn-primary">밴드 정보 저장 / 코드 생성</button>
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-1">📨 초대코드 일괄 생성</p>
+        <p class="text-xs text-slate-500 mb-3">저장된 악기 구성을 기반으로 파트별 초대코드를 자동 생성합니다.</p>
+        <div id="invite-gen-info" class="mb-3" style="background:#0f172a;border:1px solid #334155;border-radius:.75rem;padding:.75rem 1rem;">
+            <p class="text-xs text-slate-500">현재 밴드코드</p>
+            <p id="invite-band-code" class="font-mono text-blue-400 font-bold">—</p>
+            <p class="text-xs text-slate-500 mt-1.5">구성 파트</p>
+            <p id="invite-parts-preview" class="text-xs text-slate-300">—</p>
         </div>
-
-        <!-- 악기 구성 멤버 설정 -->
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-1">🎹 악기 구성 설정</p>
-            <p class="text-xs text-slate-500 mb-3">버튼을 눌러 멤버 파트를 추가하세요. 같은 악기를 여러 번 누르면 2번, 3번 파트가 생성됩니다.</p>
-
-            <!-- 기본 악기 버튼 -->
-            <div class="flex flex-wrap gap-2 mb-3">
-                <button class="instrument-btn" onclick="addInstrument('VOCAL')">🎤 보컬</button>
-                <button class="instrument-btn" onclick="addInstrument('GUITAR')">🎸 기타</button>
-                <button class="instrument-btn" onclick="addInstrument('BASS')">🎸 베이스</button>
-                <button class="instrument-btn" onclick="addInstrument('DRUM')">🥁 드럼</button>
-                <button class="instrument-btn" onclick="addInstrument('KEY')">🎹 키보드</button>
-                <button class="instrument-btn" onclick="addInstrument('PIANO')">🎹 피아노</button>
-                <button class="instrument-btn" onclick="addInstrument('VIOLIN')">🎻 바이올린</button>
-                <button class="instrument-btn" onclick="addInstrument('SAX')">🎷 색소폰</button>
-                <button class="instrument-btn" onclick="addInstrument('TRUMPET')">🎺 트럼펫</button>
-                <button class="instrument-btn" onclick="addInstrument('HARMONICA')">🪗 하모니카</button>
-            </div>
-
-            <!-- 직접 입력 -->
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="custom-instrument" placeholder="특수 악기 직접 입력 (영문)" style="border-radius:.65rem;padding:.45rem .85rem;font-size:.8rem;">
-                <button onclick="addCustomInstrument()" style="background:#1e3a8a;color:#93c5fd;border:1px solid #3b82f6;border-radius:.65rem;padding:.45rem .85rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
-            </div>
-
-            <!-- 선택된 파트 목록 -->
-            <div class="mb-3">
-                <p class="text-xs text-slate-500 mb-2">구성된 파트 <span id="part-count" class="text-blue-400">0명</span></p>
-                <div id="selected-parts" class="space-y-1.5"></div>
-                <p id="no-parts-msg" class="text-xs text-slate-600 text-center py-3">악기를 선택해주세요</p>
-            </div>
-
-            <button onclick="saveInstruments()" class="btn btn-success">악기 구성 저장</button>
-        </div>
-    </div>
-
-    <!-- ──────────────────────────────
-         탭 ② 초대코드
-    ────────────────────────────── -->
-    <div id="tab-invites" class="tab-section">
-
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-1">📨 초대코드 일괄 생성</p>
-            <p class="text-xs text-slate-500 mb-3">저장된 악기 구성을 기반으로 파트별 초대코드를 자동 생성합니다.</p>
-            <div id="invite-gen-info" class="mb-3" style="background:#0f172a;border:1px solid #334155;border-radius:.75rem;padding:.75rem 1rem;">
-                <p class="text-xs text-slate-500">현재 밴드코드</p>
-                <p id="invite-band-code" class="font-mono text-blue-400 font-bold">—</p>
-                <p class="text-xs text-slate-500 mt-1.5">구성 파트</p>
-                <p id="invite-parts-preview" class="text-xs text-slate-300">—</p>
-            </div>
-            <button onclick="generateAllInvites()" class="btn btn-primary mb-2">⚡ 파트별 초대코드 일괄 생성</button>
-            <button onclick="generateSingleInvite()" class="btn btn-ghost">단일 파트 코드 추가 생성 ▾</button>
-            <!-- 단일 생성 패널 -->
-            <div id="single-invite-panel" class="hidden mt-3 space-y-2">
-                <select id="single-part-select" style="font-size:.8rem;padding:.45rem .85rem;">
-                    <option value="">파트 선택...</option>
-                </select>
-                <button onclick="doSingleInvite()" class="btn btn-primary" style="font-size:.8rem;padding:.5rem 1rem;">생성</button>
-            </div>
-        </div>
-
-        <!-- 생성된 코드 목록 -->
-        <div class="card">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-bold text-white">발급된 초대코드</p>
-                <button onclick="copyAllCodes()" class="btn-sm" style="background:#1e3a8a;color:#93c5fd;border:1px solid #1e40af;">전체 복사</button>
-            </div>
-            <div id="invite-list" class="space-y-1">
-                <p class="text-xs text-slate-600 text-center py-3">생성된 코드가 없습니다</p>
-            </div>
+        <button onclick="generateAllInvites()" class="btn btn-primary mb-2">⚡ 파트별 초대코드 일괄 생성</button>
+        <button onclick="generateSingleInvite()" class="btn btn-ghost">단일 파트 코드 추가 생성 ▾</button>
+        <!-- 단일 생성 패널 -->
+        <div id="single-invite-panel" class="hidden mt-3 space-y-2">
+            <select id="single-part-select" style="font-size:.8rem;padding:.45rem .85rem;">
+                <option value="">파트 선택...</option>
+            </select>
+            <button onclick="doSingleInvite()" class="btn btn-primary" style="font-size:.8rem;padding:.5rem 1rem;">생성</button>
         </div>
     </div>
 
-    <!-- ──────────────────────────────
-         탭 ③ 멤버 관리
-    ────────────────────────────── -->
-    <div id="tab-members" class="tab-section">
-        <div class="card">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-bold text-white">전체 멤버</p>
-                <span id="member-count" class="text-xs text-blue-400 font-bold">0명</span>
-            </div>
-            <div id="member-list" class="space-y-1">
-                <p class="text-xs text-slate-600 text-center py-3">가입된 멤버가 없습니다</p>
-            </div>
+    <!-- 생성된 코드 목록 -->
+    <div class="card">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-bold text-white">발급된 초대코드</p>
+            <button onclick="copyAllCodes()" class="btn-sm" style="background:#1e3a8a;color:#93c5fd;border:1px solid #1e40af;">전체 복사</button>
         </div>
+        <div id="invite-list" class="space-y-1">
+            <p class="text-xs text-slate-600 text-center py-3">생성된 코드가 없습니다</p>
+        </div>
+    </div>
+</div>
 
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-2">🎸 밴드 리더 지정</p>
-            <p class="text-xs text-slate-500 mb-3">지정된 멤버는 공지·투표·곡 추가 등 밴드 운영 권한을 갖습니다.</p>
-            <div class="field">
-                <label>리더로 지정할 멤버</label>
-                <select id="leader-select">
-                    <option value="">-- 멤버 선택 --</option>
-                </select>
-            </div>
-            <button onclick="setLeader()" class="btn btn-success">리더로 지정</button>
+<!-- ──────────────────────────────
+     탭 ③ 멤버 관리
+────────────────────────────── -->
+<div id="tab-members" class="tab-section">
+    <div class="card">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-bold text-white">전체 멤버</p>
+            <span id="member-count" class="text-xs text-blue-400 font-bold">0명</span>
+        </div>
+        <div id="member-list" class="space-y-1">
+            <p class="text-xs text-slate-600 text-center py-3">가입된 멤버가 없습니다</p>
         </div>
     </div>
 
-    <!-- ──────────────────────────────
-         탭 ④ 시스템 설정
-    ────────────────────────────── -->
-    <div id="tab-system" class="tab-section">
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-3">🔐 관리자 비밀번호 변경</p>
-            <div class="field">
-                <label>새 비밀번호 (6자 이상)</label>
-                <input type="password" id="new-pw" placeholder="새 비밀번호">
-            </div>
-            <div class="field">
-                <label>비밀번호 확인</label>
-                <input type="password" id="new-pw-confirm" placeholder="다시 입력">
-            </div>
-            <button onclick="changePw()" class="btn btn-primary">변경</button>
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-2">🎸 밴드 리더 지정</p>
+        <p class="text-xs text-slate-500 mb-3">지정된 멤버는 공지·투표·곡 추가 등 밴드 운영 권한을 갖습니다.</p>
+        <div class="field">
+            <label>리더로 지정할 멤버</label>
+            <select id="leader-select">
+                <option value="">-- 멤버 선택 --</option>
+            </select>
         </div>
+        <button onclick="setLeader()" class="btn btn-success">리더로 지정</button>
+    </div>
+</div>
 
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-2">🗑️ 데이터 초기화</p>
-            <p class="text-xs text-slate-500 mb-3">선택한 데이터를 Firebase에서 영구 삭제합니다. 되돌릴 수 없습니다.</p>
-            <div class="space-y-2">
-                <button onclick="clearCol('usan_notices')" class="btn btn-danger">공지 전체 삭제</button>
-                <button onclick="clearCol('usan_vote')" class="btn btn-danger" style="margin-top:.5rem">투표 데이터 초기화</button>
-                <button onclick="clearCol('usan_invites')" class="btn btn-danger" style="margin-top:.5rem">초대코드 전체 삭제</button>
-            </div>
+<!-- ──────────────────────────────
+     탭 ④ 시스템 설정
+────────────────────────────── -->
+<div id="tab-system" class="tab-section">
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-3">🔐 관리자 비밀번호 변경</p>
+        <div class="field">
+            <label>새 비밀번호 (6자 이상)</label>
+            <input type="password" id="new-pw" placeholder="새 비밀번호">
         </div>
+        <div class="field">
+            <label>비밀번호 확인</label>
+            <input type="password" id="new-pw-confirm" placeholder="다시 입력">
+        </div>
+        <button onclick="changePw()" class="btn btn-primary">변경</button>
+    </div>
 
-        <div class="card">
-            <p class="text-sm font-bold text-white mb-2">ℹ️ 초대코드 구조 안내</p>
-            <div style="background:#0f172a;border-radius:.65rem;padding:.85rem;font-size:.75rem;line-height:1.8;color:#64748b;">
-                <p class="text-slate-300 font-mono font-bold mb-1">SE2604-K7M2-GUITAR-X3F8</p>
-                <p><span class="text-blue-400">SE</span> = 지역코드 (서울)</p>
-                <p><span class="text-blue-400">2604</span> = 생성 연월 (2026년 04월)</p>
-                <p><span class="text-blue-400">K7M2</span> = 밴드 난수 (충돌 방지)</p>
-                <p><span class="text-blue-400">GUITAR</span> = 악기/파트</p>
-                <p><span class="text-blue-400">X3F8</span> = 멤버 개인 난수</p>
-            </div>
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-2">🗑️ 데이터 초기화</p>
+        <p class="text-xs text-slate-500 mb-3">선택한 데이터를 Firebase에서 영구 삭제합니다. 되돌릴 수 없습니다.</p>
+        <div class="space-y-2">
+            <button onclick="clearCol('usan_notices')" class="btn btn-danger">공지 전체 삭제</button>
+            <button onclick="clearCol('usan_vote')" class="btn btn-danger" style="margin-top:.5rem">투표 데이터 초기화</button>
+            <button onclick="clearCol('usan_invites')" class="btn btn-danger" style="margin-top:.5rem">초대코드 전체 삭제</button>
         </div>
     </div>
+
+    <div class="card">
+        <p class="text-sm font-bold text-white mb-2">ℹ️ 초대코드 구조 안내</p>
+        <div style="background:#0f172a;border-radius:.65rem;padding:.85rem;font-size:.75rem;line-height:1.8;color:#64748b;">
+            <p class="text-slate-300 font-mono font-bold mb-1">SE2604-K7M2-GUITAR-X3F8</p>
+            <p><span class="text-blue-400">SE</span> = 지역코드 (서울)</p>
+            <p><span class="text-blue-400">2604</span> = 생성 연월 (2026년 04월)</p>
+            <p><span class="text-blue-400">K7M2</span> = 밴드 난수 (충돌 방지)</p>
+            <p><span class="text-blue-400">GUITAR</span> = 악기/파트</p>
+            <p><span class="text-blue-400">X3F8</span> = 멤버 개인 난수</p>
+        </div>
+    </div>
+</div>
+```
 
 </div><!-- end admin-dash -->
 
 <!-- ════════════════════════════════
      Firebase + 앱 로직
 ════════════════════════════════ -->
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
@@ -678,16 +687,37 @@ function loadMembers() {
             const data   = d.data();
             const role   = data.role || 'member';
             const isLead = role === 'leader';
-            const row    = document.createElement('div');
+            // 생년월일 포맷 YY/MM/DD로 보기 좋게
+            const birthRaw  = data.birth || '';
+            const birthFmt  = birthRaw.length===6
+                ? `${birthRaw.slice(0,2)}/${birthRaw.slice(2,4)}/${birthRaw.slice(4,6)}`
+                : '—';
+            const joinedFmt = data.joinedAt ? new Date(data.joinedAt).toLocaleDateString('ko') : '';
+
+            const row = document.createElement('div');
             row.className = 'member-row';
+            row.style.cssText = 'flex-direction:column;align-items:stretch;gap:.5rem;';
             row.innerHTML = `
-                <div style="display:flex;align-items:center;gap:.5rem;">
-                    <span class="badge ${isLead ? 'badge-leader' : 'badge-member'}">${isLead ? '리더' : '멤버'}</span>
-                    <span style="font-size:.85rem;font-weight:700;color:#cbd5e1;">${data.part}</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:.5rem;">
+                        <span class="badge ${isLead ? 'badge-leader' : 'badge-member'}">${isLead ? '리더' : '멤버'}</span>
+                        <span style="font-size:.9rem;font-weight:700;color:#e2e8f0;">${data.part}</span>
+                        ${data.name ? `<span style="font-size:.75rem;color:#64748b;">${data.name}</span>` : ''}
+                    </div>
+                    <div style="display:flex;gap:.4rem;">
+                        <button onclick="openEditBirth('${d.id}','${birthRaw}','${data.part}')"
+                            style="font-size:.65rem;background:#1e3a8a;color:#93c5fd;border:none;border-radius:.4rem;padding:.2rem .5rem;cursor:pointer;font-weight:700;">
+                            ✏️ 생일수정
+                        </button>
+                        <button onclick="removeMember('${d.id}')"
+                            style="font-size:.65rem;background:#7f1d1d;color:#fca5a5;border:none;border-radius:.4rem;padding:.2rem .5rem;cursor:pointer;font-weight:700;">
+                            제거
+                        </button>
+                    </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:.5rem;">
-                    <span style="font-size:.7rem;color:#475569;">${data.joinedAt ? new Date(data.joinedAt).toLocaleDateString('ko') : ''}</span>
-                    <button onclick="removeMember('${d.id}')" style="font-size:.7rem;background:#7f1d1d;color:#fca5a5;border:none;border-radius:.4rem;padding:.2rem .55rem;cursor:pointer;font-weight:700;">제거</button>
+                <div style="display:flex;gap:1rem;font-size:.72rem;color:#475569;padding:0 .1rem;">
+                    <span>🎂 생년월일: <span style="color:#93c5fd;font-weight:700;font-family:monospace;">${birthFmt}</span></span>
+                    <span>📅 가입: ${joinedFmt}</span>
                 </div>`;
             list.appendChild(row);
 
@@ -712,6 +742,26 @@ window.setLeader = async () => {
 
 window.removeMember = async (id) => {
     if (confirm(`${id} 멤버를 삭제할까요?`)) await deleteDoc(doc(db, 'usan_band', id));
+};
+
+// ── 생년월일 수정 ──
+let editBirthTargetId = '';
+window.openEditBirth = (id, currentBirth, part) => {
+    editBirthTargetId = id;
+    document.getElementById('edit-birth-part-label').textContent = part;
+    document.getElementById('edit-birth-input').value = currentBirth;
+    document.getElementById('edit-birth-modal').style.display = 'flex';
+};
+window.closeEditBirth = () => {
+    document.getElementById('edit-birth-modal').style.display = 'none';
+    editBirthTargetId = '';
+};
+window.saveEditBirth = async () => {
+    const val = document.getElementById('edit-birth-input').value.trim();
+    if (!/^\d{6}$/.test(val)) { toast('6자리 숫자로 입력하세요 (YYMMDD)', 'err'); return; }
+    await updateDoc(doc(db, 'usan_band', editBirthTargetId), { birth: val });
+    closeEditBirth();
+    toast('생년월일이 수정됐습니다!', 'ok');
 };
 
 // ══════════════════════════════
@@ -764,5 +814,28 @@ document.getElementById('admin-pw-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') adminLogin();
 });
 </script>
+
+<!-- 생년월일 수정 모달 -->
+
+<div id="edit-birth-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:1rem;padding:1.5rem;width:100%;max-width:20rem;">
+        <p style="font-weight:700;color:#e2e8f0;margin-bottom:.25rem;">🎂 생년월일 수정</p>
+        <p id="edit-birth-part-label" style="font-size:.8rem;color:#60a5fa;margin-bottom:1rem;"></p>
+        <label style="font-size:.75rem;color:#94a3b8;display:block;margin-bottom:.35rem;">생년월일 (6자리 YYMMDD)</label>
+        <input type="text" id="edit-birth-input" maxlength="6" inputmode="numeric"
+            placeholder="예: 901225"
+            style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:.75rem;padding:.65rem 1rem;width:100%;font-size:1rem;outline:none;font-family:monospace;letter-spacing:.15em;margin-bottom:1rem;">
+        <div style="display:flex;gap:.5rem;">
+            <button onclick="closeEditBirth()"
+                style="flex:1;padding:.65rem;background:transparent;border:1px solid #334155;color:#94a3b8;border-radius:.75rem;font-size:.875rem;font-weight:700;cursor:pointer;">
+                취소
+            </button>
+            <button onclick="saveEditBirth()"
+                style="flex:1;padding:.65rem;background:#2563eb;color:white;border:none;border-radius:.75rem;font-size:.875rem;font-weight:700;cursor:pointer;">
+                저장
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
