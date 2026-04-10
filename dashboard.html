@@ -148,7 +148,13 @@
 
     <!-- 확정 일정 -->
     <div id="confirmed-schedule" class="hidden bg-green-50 border border-green-200 rounded-2xl p-4">
-        <p class="text-xs font-bold text-green-600 mb-1">✅ 확정된 합주일</p>
+        <div class="flex justify-between items-start mb-1">
+            <p class="text-xs font-bold text-green-600">✅ 확정된 합주일</p>
+            <div id="confirmed-leader-btns" class="hidden flex gap-1.5">
+                <button onclick="openEditConfirmed()" class="text-xs text-blue-600 border border-blue-300 bg-white px-2 py-0.5 rounded-lg font-bold">✏️ 수정</button>
+                <button onclick="resetVote()" class="text-xs text-red-500 border border-red-200 bg-white px-2 py-0.5 rounded-lg font-bold">↩ 재투표</button>
+            </div>
+        </div>
         <p id="confirmed-date-text" class="text-base font-bold text-green-800"></p>
         <p id="confirmed-studio-text" class="text-xs text-green-600 mt-0.5"></p>
         <p class="text-xs text-green-500 mt-1">스케줄 자동 등록됨</p>
@@ -812,6 +818,11 @@ function renderVote(data) {
         document.getElementById('vote-status-badge').textContent='확정';
         document.getElementById('submit-vote-btn').classList.add('hidden');
         document.getElementById('vote-result-panel').classList.add('hidden');
+        // 리더에게만 수정·재투표 버튼 표시
+        if (myRole==='leader') {
+            document.getElementById('confirmed-leader-btns').classList.remove('hidden');
+            document.getElementById('confirmed-leader-btns').style.display='flex';
+        }
         return;
     }
 
@@ -908,6 +919,48 @@ async function confirmVote(opt) {
     });
     toast('합주일 확정! 공지로 알렸습니다 🎉','ok');
 }
+
+// ── 투표 재시작 (리더) ──
+window.resetVote = async () => {
+    if (!confirm('확정을 취소하고 새 투표를 다시 만드시겠습니까?\n기존 투표 데이터는 삭제됩니다.')) return;
+    if (!currentVoteId) return;
+    await deleteDoc(doc(db,'usan_vote',currentVoteId));
+    document.getElementById('confirmed-schedule').classList.add('hidden');
+    document.getElementById('confirmed-leader-btns').classList.add('hidden');
+    toast('투표가 초기화됐습니다. 새 투표를 만들어주세요.','warn');
+};
+
+// ── 확정일 수정 (리더) ──
+window.openEditConfirmed = async () => {
+    if (!currentVoteId) return;
+    const snap = await getDoc(doc(db,'usan_vote',currentVoteId));
+    const data = snap.data();
+    // 모달 열고 현재 값 세팅
+    document.getElementById('edit-confirmed-date').value = data.confirmedDate || '';
+    // 시간 드롭다운 세팅
+    const sel = document.getElementById('edit-confirmed-time');
+    sel.value = data.confirmedTime || '14:00';
+    openModal('editConfirmedModal');
+};
+
+window.saveEditConfirmed = async () => {
+    const newDate = document.getElementById('edit-confirmed-date').value;
+    const newTime = document.getElementById('edit-confirmed-time').value;
+    if (!newDate) return toast('날짜를 입력하세요','warn');
+    if (!currentVoteId) return;
+    await updateDoc(doc(db,'usan_vote',currentVoteId),{confirmedDate:newDate, confirmedTime:newTime});
+    // 수정 공지
+    const DAY=['일','월','화','수','목','금','토'];
+    const [,mm,dd]=newDate.split('-');
+    const dn=DAY[new Date(newDate).getDay()];
+    await addDoc(collection(db,'usan_notices'),{
+        title:`📅 합주일 수정: ${parseInt(mm)}월 ${parseInt(dd)}일 (${dn}) ${newTime}`,
+        body:'합주 일정이 변경되었습니다. 확인해주세요!',
+        important:true, auto:true, createdAt:serverTimestamp()
+    });
+    closeModal('editConfirmedModal');
+    toast('합주일 수정 완료! 공지로 알렸습니다.','ok');
+};
 
 function fmtDate(ds,ts) {
     if(!ds) return '';
@@ -1252,5 +1305,29 @@ function toast(msg,type='ok'){
     setTimeout(()=>el.remove(),2400);
 }
 </script>
+
+<!-- ══ 모달: 확정일 수정 (리더) ══ -->
+<div id="editConfirmedModal" class="modal-overlay">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="font-bold text-gray-800 mb-1">✏️ 합주일 수정</p>
+        <p class="text-xs text-gray-400 mb-3">수정 후 멤버에게 자동으로 공지됩니다</p>
+        <div class="mb-3">
+            <label class="text-xs text-gray-500 mb-1.5 block">날짜</label>
+            <input type="date" id="edit-confirmed-date" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm">
+        </div>
+        <div class="mb-4">
+            <label class="text-xs text-gray-500 mb-1.5 block">시간 (30분 단위)</label>
+            <select id="edit-confirmed-time" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm">
+<option value="09:00">09:00</option><option value="09:30">09:30</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option><option value="18:00">18:00</option><option value="18:30">18:30</option><option value="19:00">19:00</option><option value="19:30">19:30</option><option value="20:00">20:00</option><option value="20:30">20:30</option><option value="21:00">21:00</option><option value="21:30">21:30</option><option value="22:00">22:00</option><option value="22:30">22:30</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="closeModal('editConfirmedModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
+            <button onclick="saveEditConfirmed()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">수정 저장</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
