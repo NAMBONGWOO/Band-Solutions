@@ -339,11 +339,28 @@ const DEFAULT_PW = 'woosanband2024';
 window.adminLogin = async () => {
     const id = document.getElementById('admin-id-input').value.trim();
     const pw = document.getElementById('admin-pw-input').value;
-    const credRef = doc(db, 'usan_system', 'admin_credentials');
-    const credSnap = await getDoc(credRef);
-    const validId = credSnap.exists() ? (credSnap.data().id || DEFAULT_ID) : DEFAULT_ID;
-    const validPw = credSnap.exists() ? (credSnap.data().pw || DEFAULT_PW) : DEFAULT_PW;
+    if (!id || !pw) { toast('ID와 비밀번호를 입력하세요', 'err'); return; }
+
+    let validId = DEFAULT_ID;
+    let validPw = DEFAULT_PW;
+    try {
+        const credSnap = await getDoc(doc(db, 'usan_system', 'admin_credentials'));
+        if (credSnap.exists() && credSnap.data().id) validId = credSnap.data().id;
+        if (credSnap.exists() && credSnap.data().pw) validPw = credSnap.data().pw;
+    } catch(e) {
+        // Firebase 읽기 실패 시 기본값으로 비교
+        console.warn('크레덴셜 읽기 실패, 기본값 사용:', e);
+    }
+
     if (id === validId && pw === validPw) {
+        // 최초 로그인 시 Firebase에 기본 크레덴셜 저장 (이후 변경 가능)
+        try {
+            const credRef = doc(db, 'usan_system', 'admin_credentials');
+            const snap = await getDoc(credRef);
+            if (!snap.exists()) {
+                await setDoc(credRef, { id: DEFAULT_ID, pw: DEFAULT_PW });
+            }
+        } catch(e) { console.warn('크레덴셜 저장 실패:', e); }
         sessionStorage.setItem('adminOK', '1');
         showDash();
     } else {
