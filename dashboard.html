@@ -11,43 +11,58 @@
         .tab-content.active { display: block; }
         .nav-btn.active { color: #1d4ed8; }
         .nav-btn.active .nav-icon-bg { background-color: #dbeafe; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
-        .modal-overlay.open { display: flex; }
-        .modal-sheet { background: white; border-radius: 1.25rem 1.25rem 0 0; width: 100%; max-width: 28rem; padding: 1.25rem; max-height: 85vh; overflow-y: auto; }
-        .modal-handle { width: 2.5rem; height: 4px; background: #e5e7eb; border-radius: 2px; margin: 0 auto 1rem; }
-        input[type="checkbox"] { width:18px; height:18px; accent-color:#2563eb; cursor:pointer; }
-        input[type="range"] { accent-color: #2563eb; }
-        .vote-bar { transition: width 0.4s ease; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        /* 연습곡 카드 펼침 */
-        .song-detail { display: none; }
-        .song-detail.open { display: block; }
-        .song-card { border: 1px solid #e5e7eb; }
-        .song-card.expanded { border-color: #3b82f6; }
+        /* 바텀시트 모달 */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:50; display:none; align-items:flex-end; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal-sheet { background:white; border-radius:1.25rem 1.25rem 0 0; width:100%; max-width:28rem; padding:1.25rem; max-height:88vh; overflow-y:auto; }
+        .modal-handle { width:2.5rem; height:4px; background:#e5e7eb; border-radius:2px; margin:0 auto 1rem; }
 
-        /* 상태 배지 */
+        /* 공지 핀 */
+        .notice-pin { border-left:3px solid #3b82f6; padding:.55rem .85rem; background:#eff6ff; border-radius:0 .65rem .65rem 0; margin-bottom:.5rem; }
+        .notice-pin.imp { border-left-color:#ef4444; background:#fef2f2; }
+
+        /* 연습곡 카드 */
+        .song-card { border:1px solid #e5e7eb; transition:border-color .2s; }
+        .song-card.expanded { border-color:#3b82f6; }
+        .song-detail { display:none; }
+        .song-detail.open { display:block; }
         .badge-candidate { background:#eff6ff; color:#1d4ed8; }
         .badge-practice   { background:#fffbeb; color:#b45309; }
         .badge-done       { background:#f0fdf4; color:#15803d; }
 
-        /* 파일 행 */
-        .file-row { display:flex; align-items:center; gap:.6rem; padding:.65rem .85rem; border-bottom:1px solid #f3f4f6; }
-        .file-row:last-child { border-bottom: none; }
+        /* 파일행 */
+        .file-row { display:flex; align-items:center; gap:.55rem; padding:.6rem .85rem; border-bottom:1px solid #f3f4f6; }
+        .file-row:last-child { border-bottom:none; }
 
-        /* 공지 핀 */
-        .notice-pin { border-left: 3px solid #3b82f6; padding: .6rem .85rem; background:#eff6ff; border-radius: 0 .65rem .65rem 0; }
-        .notice-pin.important { border-left-color: #ef4444; background: #fef2f2; }
-
-        /* 참고자료 링크 */
-        .ref-item { display:flex; align-items:center; gap:.6rem; padding:.6rem .85rem; border-bottom:1px solid #f3f4f6; }
+        /* 참고자료 */
+        .ref-item { display:flex; align-items:center; gap:.55rem; padding:.6rem .85rem; border-bottom:1px solid #f3f4f6; }
         .ref-item:last-child { border-bottom:none; }
+
+        /* 날짜 선택 그리드 */
+        .date-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+        .date-cell { text-align:center; padding:6px 2px; font-size:.75rem; border-radius:6px; cursor:pointer; color:#374151; border:1px solid transparent; transition:all .15s; }
+        .date-cell:hover { background:#eff6ff; border-color:#bfdbfe; }
+        .date-cell.selected { background:#2563eb; color:white; border-color:#2563eb; font-weight:700; }
+        .date-cell.today { border-color:#fbbf24; color:#b45309; font-weight:700; }
+        .date-cell.disabled { color:#d1d5db; cursor:default; }
+        .date-cell.selected.today { background:#2563eb; color:white; }
+
+        /* 후보곡 투표 */
+        .song-vote-item { border:1px solid #e5e7eb; border-radius:.75rem; padding:.75rem 1rem; margin-bottom:.5rem; cursor:pointer; transition:all .15s; }
+        .song-vote-item.voted { border-color:#3b82f6; background:#eff6ff; }
+        .vote-bar-bg { height:4px; background:#f3f4f6; border-radius:2px; overflow:hidden; margin-top:.4rem; }
+        .vote-bar-fill { height:100%; border-radius:2px; background:#93c5fd; transition:width .4s; }
+
+        input[type="checkbox"] { width:17px; height:17px; accent-color:#2563eb; }
+        input[type="range"] { accent-color:#2563eb; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
     </style>
 </head>
 <body class="pb-24">
 
-<!-- ── 상단 헤더 ── -->
+<!-- ── 헤더 ── -->
 <div class="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-lg">☂️</div>
@@ -61,21 +76,23 @@
 
 <div class="max-w-md mx-auto px-4 pt-4">
 
-<!-- ════════ ① 홈 탭 ════════ -->
+<!-- ══════════════════════════════
+     ① 홈 탭
+══════════════════════════════ -->
 <div id="tab-home" class="tab-content active space-y-4">
 
     <!-- 리더 관리 도구 -->
     <div id="admin-panel" class="hidden bg-blue-600 rounded-2xl p-4 space-y-3">
         <p class="text-blue-100 text-xs font-bold">🌟 리더 관리 도구</p>
         <div class="grid grid-cols-2 gap-2">
-            <button onclick="openTab('schedule')" class="bg-white text-blue-600 py-2.5 rounded-xl text-sm font-bold">📅 투표 만들기</button>
+            <button onclick="openTab('schedule')" class="bg-white text-blue-600 py-2.5 rounded-xl text-sm font-bold">📅 합주 투표</button>
             <button onclick="openModal('noticeModal')" class="bg-blue-500 border border-blue-400 text-white py-2.5 rounded-xl text-sm font-bold">📢 공지 올리기</button>
-            <button onclick="openModal('songModal')" class="bg-blue-500 border border-blue-400 text-white py-2.5 rounded-xl text-sm font-bold">🎵 곡 추가</button>
+            <button onclick="openModal('songModal')" class="bg-blue-500 border border-blue-400 text-white py-2.5 rounded-xl text-sm font-bold">🎵 연습곡 추가</button>
             <button onclick="openModal('refModal')" class="bg-blue-500 border border-blue-400 text-white py-2.5 rounded-xl text-sm font-bold">🔗 참고자료 등록</button>
         </div>
     </div>
 
-    <!-- D-day + 합주실 정보 -->
+    <!-- D-day + 합주실 -->
     <div class="bg-white rounded-2xl p-4 shadow-sm">
         <p class="text-xs text-gray-400 font-medium mb-2">다음 합주</p>
         <div id="dday-content" class="text-gray-400 text-sm text-center py-2">확정된 합주 일정이 없습니다</div>
@@ -88,7 +105,7 @@
         </div>
     </div>
 
-    <!-- 멤버 현황 (간략) -->
+    <!-- 멤버 현황 -->
     <div class="bg-white rounded-2xl p-4 shadow-sm">
         <div class="flex justify-between items-center mb-3">
             <p class="text-xs font-bold text-gray-500">👥 멤버</p>
@@ -97,30 +114,31 @@
         <div id="home-member-chips" class="flex flex-wrap gap-1.5"></div>
     </div>
 
-    <!-- 공지사항 -->
+    <!-- 공지사항 (최신 2개 + 더보기) -->
     <div class="bg-white rounded-2xl p-4 shadow-sm">
         <div class="flex justify-between items-center mb-3">
             <p class="text-xs font-bold text-gray-500">📢 공지사항</p>
-            <button id="notice-more-btn" class="text-xs text-blue-500 hidden">더보기</button>
+            <button id="notice-more-btn" onclick="openModal('noticeListModal')" class="hidden text-xs text-blue-500 font-bold">전체보기 ›</button>
         </div>
-        <div id="notice-feed" class="space-y-2">
+        <div id="notice-feed-home" class="space-y-1.5">
             <p class="text-gray-400 text-xs text-center py-2">공지가 없습니다</p>
         </div>
     </div>
 
     <!-- 참고자료 -->
-    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div class="flex justify-between items-center px-4 pt-4 pb-2">
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
+        <div class="px-4 pt-4 pb-2">
             <p class="text-xs font-bold text-gray-500">🔗 참고자료</p>
         </div>
         <div id="ref-list" class="divide-y divide-gray-50">
             <p class="text-gray-400 text-xs text-center py-4">등록된 참고자료가 없습니다</p>
         </div>
     </div>
-
 </div>
 
-<!-- ════════ ② 스케줄 탭 ════════ -->
+<!-- ══════════════════════════════
+     ② 스케줄 탭
+══════════════════════════════ -->
 <div id="tab-schedule" class="tab-content space-y-4">
 
     <!-- 확정 일정 -->
@@ -144,28 +162,87 @@
         <button id="confirm-vote-btn" class="hidden w-full py-3 bg-green-600 text-white font-bold rounded-xl text-sm">✅ 최다 득표일로 확정 (리더)</button>
     </div>
 
-    <!-- 리더: 투표 만들기 -->
-    <div id="create-vote-section" class="hidden bg-white rounded-2xl p-4 shadow-sm space-y-3">
-        <p class="text-sm font-bold text-gray-700">📅 새 투표 만들기</p>
-        <div id="date-inputs" class="space-y-2">
-            <div class="flex gap-2">
-                <input type="date" class="vote-date-input flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm">
-                <input type="time" class="vote-time-input w-28 px-3 py-2 border border-gray-200 rounded-xl text-sm" value="14:00">
+    <!-- 리더: 새 투표 만들기 (개선된 UI) -->
+    <div id="create-vote-section" class="hidden bg-white rounded-2xl p-4 shadow-sm space-y-4">
+        <p class="text-sm font-bold text-gray-700">📅 새 합주 투표 만들기</p>
+
+        <!-- 월 선택 -->
+        <div>
+            <p class="text-xs text-gray-500 mb-2">월 선택</p>
+            <div class="flex items-center gap-3">
+                <button onclick="changeVoteMonth(-1)" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 font-bold text-sm">‹</button>
+                <span id="vote-month-label" class="flex-1 text-center text-sm font-bold text-gray-800"></span>
+                <button onclick="changeVoteMonth(1)" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 font-bold text-sm">›</button>
             </div>
         </div>
-        <button onclick="addDateInput()" class="w-full py-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-500">+ 날짜 후보 추가</button>
-        <input type="text" id="vote-deadline" placeholder="마감일 안내 (예: 4월 21일까지)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+
+        <!-- 날짜 캘린더 -->
+        <div>
+            <p class="text-xs text-gray-500 mb-2">날짜 선택 <span class="text-blue-500">(여러 개 선택 가능)</span></p>
+            <div class="grid grid-cols-7 gap-0.5 mb-1">
+                <div class="text-center text-xs text-red-400 py-1">일</div>
+                <div class="text-center text-xs text-gray-400 py-1">월</div>
+                <div class="text-center text-xs text-gray-400 py-1">화</div>
+                <div class="text-center text-xs text-gray-400 py-1">수</div>
+                <div class="text-center text-xs text-gray-400 py-1">목</div>
+                <div class="text-center text-xs text-gray-400 py-1">금</div>
+                <div class="text-center text-xs text-blue-400 py-1">토</div>
+            </div>
+            <div id="vote-cal-grid" class="date-grid"></div>
+        </div>
+
+        <!-- 선택된 날짜 + 시간 -->
+        <div>
+            <p class="text-xs text-gray-500 mb-2">선택된 날짜 & 시간 설정</p>
+            <div id="selected-dates-list" class="space-y-2">
+                <p class="text-xs text-gray-400 text-center py-2">위에서 날짜를 선택하세요</p>
+            </div>
+        </div>
+
         <button onclick="createVote()" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">투표 시작하기</button>
     </div>
 </div>
 
-<!-- ════════ ③ 연습곡 탭 (자료실 통합) ════════ -->
+<!-- ══════════════════════════════
+     ③ 자료실 탭
+══════════════════════════════ -->
+<div id="tab-library" class="tab-content space-y-4">
+
+    <!-- 후보곡 투표 섹션 -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+        <div class="flex justify-between items-center">
+            <p class="text-sm font-bold text-gray-700">🗳️ 다음 연습곡 투표</p>
+            <span id="song-vote-badge" class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">진행중</span>
+        </div>
+        <p class="text-xs text-gray-400">원하는 곡에 투표하세요. 과반수 득표 시 연습곡으로 자동 등록됩니다.</p>
+
+        <div id="song-vote-list" class="space-y-2">
+            <p class="text-gray-400 text-xs text-center py-3">후보곡이 없습니다</p>
+        </div>
+
+        <!-- 곡 제안 (멤버 누구나) -->
+        <button onclick="openModal('suggestSongModal')" class="w-full py-2.5 border border-dashed border-blue-300 text-blue-500 rounded-xl text-sm font-bold">+ 곡 제안하기</button>
+    </div>
+
+    <!-- 참고자료 (홈과 동일 데이터, 여기서는 전체 표시) -->
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div class="flex justify-between items-center px-4 pt-4 pb-2">
+            <p class="text-sm font-bold text-gray-700">🔗 참고자료</p>
+            <button id="ref-add-btn" onclick="openModal('refModal')" class="hidden text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg">+ 등록</button>
+        </div>
+        <div id="ref-list-full" class="divide-y divide-gray-50">
+            <p class="text-gray-400 text-xs text-center py-4">등록된 참고자료가 없습니다</p>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════
+     ④ 연습곡 탭
+══════════════════════════════ -->
 <div id="tab-songs" class="tab-content space-y-4">
 
-    <!-- 필터 -->
     <div class="flex gap-2 overflow-x-auto pb-1">
         <button onclick="filterSongs('all',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-blue-600 text-white rounded-full text-xs font-bold">전체</button>
-        <button onclick="filterSongs('candidate',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">후보곡</button>
         <button onclick="filterSongs('practice',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">연습중</button>
         <button onclick="filterSongs('done',this)" class="song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">완료</button>
     </div>
@@ -174,7 +251,7 @@
 
     <!-- 내 진도 업데이트 -->
     <div id="progress-section" class="hidden bg-white rounded-2xl p-4 shadow-sm space-y-3">
-        <p class="text-sm font-bold text-gray-700">📊 내 연습 진도 업데이트</p>
+        <p class="text-sm font-bold text-gray-700">📊 내 연습 진도</p>
         <select id="progress-song-select" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
             <option value="">연습중인 곡 선택...</option>
         </select>
@@ -186,7 +263,9 @@
     </div>
 </div>
 
-<!-- ════════ ④ 멤버 탭 (리더만) ════════ -->
+<!-- ══════════════════════════════
+     ⑤ 멤버 탭 (리더만)
+══════════════════════════════ -->
 <div id="tab-members" class="tab-content space-y-4">
     <div class="bg-white rounded-2xl p-4 shadow-sm">
         <div class="flex justify-between items-center mb-3">
@@ -195,48 +274,51 @@
         </div>
         <ul id="member-list-admin" class="space-y-2"></ul>
     </div>
-    <!-- 합주실 정보 (리더 확인용) -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm space-y-2">
-        <p class="text-xs font-bold text-gray-500">🏢 합주실 정보</p>
+    <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <p class="text-xs font-bold text-gray-500 mb-2">🏢 합주실 정보</p>
         <p id="member-tab-studio" class="text-sm text-gray-600">—</p>
     </div>
 </div>
 
 </div><!-- end max-w-md -->
 
-<!-- ── 하단 네비게이션 ── -->
+<!-- ── 하단 네비게이션 (5탭) ── -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg z-40">
     <div class="max-w-md mx-auto flex justify-around py-2">
-        <button onclick="openTab('home')" class="nav-btn active flex flex-col items-center gap-0.5 px-4 py-1">
+        <button onclick="openTab('home')" class="nav-btn active flex flex-col items-center gap-0.5 px-2 py-1">
             <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base bg-blue-50">🏠</span>
             <span class="text-xs text-gray-500">홈</span>
         </button>
-        <button onclick="openTab('schedule')" class="nav-btn flex flex-col items-center gap-0.5 px-4 py-1">
+        <button onclick="openTab('schedule')" class="nav-btn flex flex-col items-center gap-0.5 px-2 py-1">
             <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">📅</span>
             <span class="text-xs text-gray-500">스케줄</span>
         </button>
-        <button onclick="openTab('songs')" class="nav-btn flex flex-col items-center gap-0.5 px-4 py-1">
+        <button onclick="openTab('library')" class="nav-btn flex flex-col items-center gap-0.5 px-2 py-1">
+            <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">🗳️</span>
+            <span class="text-xs text-gray-500">자료실</span>
+        </button>
+        <button onclick="openTab('songs')" class="nav-btn flex flex-col items-center gap-0.5 px-2 py-1">
             <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">🎵</span>
             <span class="text-xs text-gray-500">연습곡</span>
         </button>
-        <button id="nav-members-btn" onclick="openTab('members')" class="nav-btn hidden flex flex-col items-center gap-0.5 px-4 py-1">
+        <button id="nav-members-btn" onclick="openTab('members')" class="nav-btn hidden flex flex-col items-center gap-0.5 px-2 py-1">
             <span class="nav-icon-bg w-8 h-8 rounded-xl flex items-center justify-center text-base">👥</span>
             <span class="text-xs text-gray-500">멤버</span>
         </button>
     </div>
 </nav>
 
-<!-- ════════ 모달: 공지 작성 ════════ -->
+<!-- ══ 모달: 공지 작성 ══ -->
 <div id="noticeModal" class="modal-overlay">
     <div class="modal-sheet">
         <div class="modal-handle"></div>
         <p class="font-bold text-gray-800 mb-3">📢 공지 올리기</p>
         <div class="flex gap-2 mb-3">
             <button onclick="setNoticeType('normal')" id="nt-normal" class="flex-1 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white">일반</button>
-            <button onclick="setNoticeType('important')" id="nt-important" class="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600">중요</button>
+            <button onclick="setNoticeType('important')" id="nt-important" class="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600">🔴 중요</button>
         </div>
-        <input type="text" id="notice-title" placeholder="제목" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <textarea id="notice-body" rows="3" placeholder="내용" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm resize-none mb-3"></textarea>
+        <input type="text" id="notice-title" placeholder="제목" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <textarea id="notice-body" rows="3" placeholder="내용 (선택)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm resize-none mb-3"></textarea>
         <div class="flex gap-2">
             <button onclick="closeModal('noticeModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
             <button onclick="postNotice()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">올리기</button>
@@ -244,15 +326,24 @@
     </div>
 </div>
 
-<!-- ════════ 모달: 연습곡 추가 ════════ -->
+<!-- ══ 모달: 공지 전체보기 ══ -->
+<div id="noticeListModal" class="modal-overlay">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="font-bold text-gray-800 mb-3">📢 전체 공지</p>
+        <div id="notice-list-all" class="space-y-2 mb-3"></div>
+        <button onclick="closeModal('noticeListModal')" class="w-full py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">닫기</button>
+    </div>
+</div>
+
+<!-- ══ 모달: 연습곡 추가 (리더) ══ -->
 <div id="songModal" class="modal-overlay">
     <div class="modal-sheet">
         <div class="modal-handle"></div>
         <p class="font-bold text-gray-800 mb-3">🎵 연습곡 추가</p>
-        <input type="text" id="song-title-input" placeholder="곡 제목" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <input type="text" id="song-artist-input" placeholder="아티스트" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <select id="song-status-input" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-3">
-            <option value="candidate">후보곡</option>
+        <input type="text" id="song-title-input" placeholder="곡 제목" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <input type="text" id="song-artist-input" placeholder="아티스트" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <select id="song-status-input" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-3">
             <option value="practice">연습중</option>
             <option value="done">완료</option>
         </select>
@@ -263,35 +354,75 @@
     </div>
 </div>
 
-<!-- ════════ 모달: 파일 업로드 (연습곡 내부) ════════ -->
+<!-- ══ 모달: 곡 제안 (멤버 누구나) ══ -->
+<div id="suggestSongModal" class="modal-overlay">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="font-bold text-gray-800 mb-1">🎸 다음 연습곡 제안</p>
+        <p class="text-xs text-gray-400 mb-3">과반수 득표 시 자동으로 연습곡에 등록됩니다</p>
+        <input type="text" id="suggest-title" placeholder="곡 제목" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <input type="text" id="suggest-artist" placeholder="아티스트" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <input type="text" id="suggest-youtube" placeholder="유튜브 링크 (선택)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-3">
+        <div class="flex gap-2">
+            <button onclick="closeModal('suggestSongModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
+            <button onclick="suggestSong()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">제안하기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ 모달: 파일 업로드 ══ -->
 <div id="fileModal" class="modal-overlay">
     <div class="modal-sheet">
         <div class="modal-handle"></div>
         <p class="font-bold text-gray-800 mb-1">📎 자료 업로드</p>
-        <p id="file-modal-song-name" class="text-xs text-blue-600 mb-3"></p>
-        <div class="flex gap-2 mb-3">
+        <p id="file-modal-song-name" class="text-xs text-blue-500 font-bold mb-3"></p>
+        <!-- 타입 탭 -->
+        <div class="flex gap-2 mb-4">
             <button onclick="setFileType('score')" id="ft-score" class="flex-1 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white">📄 악보</button>
             <button onclick="setFileType('track')" id="ft-track" class="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600">🎧 음원</button>
-            <button onclick="setFileType('ref')" id="ft-ref" class="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600">🔗 링크</button>
+            <button onclick="setFileType('link')" id="ft-link" class="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600">🔗 링크</button>
         </div>
-        <input type="text" id="file-name-input" placeholder="파일명 또는 제목" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <input type="text" id="file-url-input" placeholder="다운로드 URL / 링크" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <input type="text" id="file-size-input" placeholder="파일 크기 (예: 2.1MB) — 선택" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-3">
-        <div class="flex gap-2">
+        <!-- 악보 영역 -->
+        <div id="upload-score-area">
+            <input type="text" id="score-name" placeholder="파일명 (예: 전파트악보.pdf)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+            <input type="text" id="score-url" placeholder="구글드라이브 공유링크" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+            <input type="text" id="score-part" placeholder="파트 (예: 전파트 / 기타 / 드럼)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm">
+        </div>
+        <!-- 음원 영역 -->
+        <div id="upload-track-area" class="hidden">
+            <select id="track-part" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+                <option value="">파트 선택...</option>
+                <option value="전체">전체 합주</option>
+                <option value="VOCAL">보컬</option>
+                <option value="GUITAR">기타</option>
+                <option value="GUITAR2">기타2</option>
+                <option value="BASS">베이스</option>
+                <option value="DRUM">드럼</option>
+                <option value="KEY">키보드</option>
+            </select>
+            <input type="text" id="track-name" placeholder="파일명 (예: BohemianRhapsody_기타.mp3)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+            <input type="text" id="track-url" placeholder="구글드라이브 공유링크" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm">
+        </div>
+        <!-- 링크 영역 -->
+        <div id="upload-link-area" class="hidden">
+            <input type="text" id="link-title" placeholder="제목 (예: 원곡 유튜브)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+            <input type="text" id="link-url" placeholder="URL" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm">
+        </div>
+        <div class="flex gap-2 mt-4">
             <button onclick="closeModal('fileModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
             <button onclick="uploadSongFile()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">업로드</button>
         </div>
     </div>
 </div>
 
-<!-- ════════ 모달: 참고자료 등록 ════════ -->
+<!-- ══ 모달: 참고자료 등록 ══ -->
 <div id="refModal" class="modal-overlay">
     <div class="modal-sheet">
         <div class="modal-handle"></div>
         <p class="font-bold text-gray-800 mb-3">🔗 참고자료 등록</p>
-        <input type="text" id="ref-title-input" placeholder="제목 (예: 보컬 레퍼런스 영상)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <input type="text" id="ref-url-input" placeholder="URL (유튜브, 드라이브 등)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-2">
-        <input type="text" id="ref-desc-input" placeholder="설명 (선택)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-3">
+        <input type="text" id="ref-title-input" placeholder="제목 (예: 보컬 레퍼런스)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <input type="text" id="ref-url-input" placeholder="URL (유튜브, 드라이브 등)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-2">
+        <input type="text" id="ref-desc-input" placeholder="설명 (선택)" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm mb-3">
         <div class="flex gap-2">
             <button onclick="closeModal('refModal')" class="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-500">취소</button>
             <button onclick="postRef()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold">등록</button>
@@ -340,72 +471,76 @@ onSnapshot(doc(db, 'usan_band', myPart), snap => {
 });
 
 function applyRoleUI(role) {
-    const isLeader = (role === 'leader');
+    const isLeader = role === 'leader';
     document.getElementById('admin-panel').classList.toggle('hidden', !isLeader);
     document.getElementById('nav-members-btn').classList.toggle('hidden', !isLeader);
     document.getElementById('create-vote-section').classList.toggle('hidden', !isLeader);
     document.getElementById('confirm-vote-btn').classList.toggle('hidden', !isLeader);
     document.getElementById('progress-section').classList.remove('hidden');
+    if (isLeader) document.getElementById('ref-add-btn')?.classList.remove('hidden');
     const badge = document.getElementById('hd-part');
     badge.textContent = isLeader ? `🎸 리더 · ${myPart}` : `PART: ${myPart}`;
     badge.style.color  = isLeader ? '#f59e0b' : '#3b82f6';
 }
 
 // ══════════════════════════════
-// 밴드 설정 정보 → 홈 화면 반영
+// 밴드 설정 → 홈 반영
 // ══════════════════════════════
 onSnapshot(doc(db, 'usan_system', 'band_info'), snap => {
     if (!snap.exists()) return;
     const d = snap.data();
-
-    // 밴드명 헤더
     if (d.name) document.getElementById('hd-bandname').textContent = d.name;
-
-    // 합주실 정보
     if (d.studioName) {
         document.getElementById('studio-info').classList.remove('hidden');
         document.getElementById('studio-name-display').textContent = d.studioName;
         document.getElementById('studio-addr-display').textContent = d.studioAddr || '';
-        document.getElementById('confirmed-studio-text').textContent = d.studioName + (d.studioAddr ? ' · ' + d.studioAddr : '');
-        document.getElementById('member-tab-studio').textContent = d.studioName + (d.studioAddr ? '\n' + d.studioAddr : '');
+        document.getElementById('confirmed-studio-text').textContent = d.studioName;
+        document.getElementById('member-tab-studio').textContent =
+            d.studioName + (d.studioAddr ? '\n' + d.studioAddr : '');
+    }
+    // 음원 파트 목록을 파트 선택에 반영
+    if (d.parts && d.parts.length) {
+        const sel = document.getElementById('track-part');
+        sel.innerHTML = '<option value="">파트 선택...</option><option value="전체">전체 합주</option>';
+        d.parts.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p; opt.textContent = p;
+            sel.appendChild(opt);
+        });
     }
 });
 
 // ══════════════════════════════
-// 멤버 현황 → 홈 칩 + 멤버탭
+// 멤버 현황
 // ══════════════════════════════
 onSnapshot(collection(db, 'usan_band'), snap => {
-    // 홈 칩
     const chips = document.getElementById('home-member-chips');
-    const countEl = document.getElementById('home-member-count');
-    const countEl2 = document.getElementById('member-count');
-    countEl.textContent = `${snap.size}명`;
-    countEl2.textContent = `${snap.size}명`;
+    document.getElementById('home-member-count').textContent = `${snap.size}명`;
+    document.getElementById('member-count').textContent = `${snap.size}명`;
     chips.innerHTML = '';
+
+    const list = document.getElementById('member-list-admin');
+    list.innerHTML = '';
+
     snap.forEach(d => {
-        const data = d.data();
-        const isMe = data.part === myPart;
+        const data   = d.data();
+        const isMe   = data.part === myPart;
         const isLead = data.role === 'leader';
+
+        // 홈 칩
         const chip = document.createElement('span');
-        chip.style.cssText = `display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;font-weight:700;padding:.25rem .6rem;border-radius:99px;background:${isMe?'#dbeafe':isLead?'#dcfce7':'#f3f4f6'};color:${isMe?'#1d4ed8':isLead?'#15803d':'#6b7280'};`;
+        chip.style.cssText = `display:inline-flex;align-items:center;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;background:${isMe?'#dbeafe':isLead?'#dcfce7':'#f3f4f6'};color:${isMe?'#1d4ed8':isLead?'#15803d':'#6b7280'};`;
         chip.textContent = `${isLead?'🎸 ':''}${data.part}${isMe?' (나)':''}`;
         chips.appendChild(chip);
-    });
 
-    // 멤버 탭 리스트 (리더용)
-    const list = document.getElementById('member-list-admin');
-    const leaderSel = document.getElementById('leader-sel-dummy'); // 없어도 됨
-    list.innerHTML = '';
-    snap.forEach(d => {
-        const data = d.data();
-        const isLead = data.role === 'leader';
+        // 멤버 탭
         const li = document.createElement('li');
-        li.className = 'flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 text-sm';
+        li.className = 'flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5';
         li.innerHTML = `
             <div class="flex items-center gap-2">
                 <span class="text-xs font-bold px-2 py-0.5 rounded-full ${isLead?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}">${isLead?'리더':'멤버'}</span>
-                <span class="font-bold text-gray-700">${data.part}</span>
-                ${data.part===myPart?'<span class="text-xs text-blue-500">(나)</span>':''}
+                <span class="font-bold text-gray-700 text-sm">${data.part}</span>
+                ${isMe?'<span class="text-xs text-blue-400">(나)</span>':''}
             </div>
             <span class="text-xs text-gray-400">${data.joinedAt?new Date(data.joinedAt).toLocaleDateString('ko'):''}</span>`;
         list.appendChild(li);
@@ -416,66 +551,93 @@ onSnapshot(collection(db, 'usan_band'), snap => {
 // 공지사항
 // ══════════════════════════════
 let noticeType = 'normal';
+let allNotices = [];
+
 window.setNoticeType = (t) => {
     noticeType = t;
-    document.getElementById('nt-normal').className    = `flex-1 py-2 rounded-xl text-xs font-bold ${t==='normal'?'bg-blue-600 text-white':'bg-gray-100 text-gray-600'}`;
+    document.getElementById('nt-normal').className    = `flex-1 py-2 rounded-xl text-xs font-bold ${t==='normal'   ?'bg-blue-600 text-white':'bg-gray-100 text-gray-600'}`;
     document.getElementById('nt-important').className = `flex-1 py-2 rounded-xl text-xs font-bold ${t==='important'?'bg-red-500 text-white':'bg-gray-100 text-gray-600'}`;
 };
 
-onSnapshot(query(collection(db, 'usan_notices'), orderBy('createdAt','desc')), snap => {
-    const feed = document.getElementById('notice-feed');
-    if (snap.empty) { feed.innerHTML = '<p class="text-gray-400 text-xs text-center py-2">공지가 없습니다</p>'; return; }
-    feed.innerHTML = '';
-    snap.forEach(d => {
-        const data = d.data();
-        const el = document.createElement('div');
-        el.className = `notice-pin${data.important?' important':''}`;
-        el.innerHTML = `
-            <div class="flex justify-between items-start">
-                <p class="text-xs font-bold ${data.important?'text-red-700':'text-blue-700'}">${data.important?'🔴 ':''} ${data.title}</p>
-                ${myRole==='leader'?`<button onclick="deleteNotice('${d.id}')" class="text-xs text-gray-300 ml-2">✕</button>`:''}
-            </div>
-            ${data.body?`<p class="text-xs mt-0.5 ${data.important?'text-red-600':'text-blue-600'}">${data.body}</p>`:''}`;
-        feed.appendChild(el);
-    });
+onSnapshot(query(collection(db,'usan_notices'), orderBy('createdAt','desc')), snap => {
+    allNotices = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderNoticeHome();
+    renderNoticeAll();
 });
+
+function renderNoticeHome() {
+    const feed = document.getElementById('notice-feed-home');
+    const moreBtn = document.getElementById('notice-more-btn');
+    if (!allNotices.length) { feed.innerHTML='<p class="text-gray-400 text-xs text-center py-2">공지가 없습니다</p>'; moreBtn.classList.add('hidden'); return; }
+    feed.innerHTML = '';
+    const show = allNotices.slice(0, 2);
+    show.forEach(n => feed.appendChild(makeNoticePin(n)));
+    if (allNotices.length > 2) moreBtn.classList.remove('hidden');
+    else moreBtn.classList.add('hidden');
+}
+
+function renderNoticeAll() {
+    const list = document.getElementById('notice-list-all');
+    if (!list) return;
+    list.innerHTML = '';
+    if (!allNotices.length) { list.innerHTML='<p class="text-gray-400 text-xs text-center py-4">공지가 없습니다</p>'; return; }
+    allNotices.forEach(n => list.appendChild(makeNoticePin(n)));
+}
+
+function makeNoticePin(n) {
+    const el = document.createElement('div');
+    el.className = `notice-pin${n.important?' imp':''}`;
+    el.innerHTML = `
+        <div class="flex justify-between items-start">
+            <p class="text-xs font-bold ${n.important?'text-red-700':'text-blue-700'} flex-1 mr-2">${n.important?'🔴 ':''}${n.title}</p>
+            ${myRole==='leader'?`<button onclick="deleteNotice('${n.id}')" class="text-gray-300 text-xs flex-none">✕</button>`:''}
+        </div>
+        ${n.body?`<p class="text-xs mt-0.5 ${n.important?'text-red-600':'text-blue-600'}">${n.body}</p>`:''}`;
+    return el;
+}
 
 window.postNotice = async () => {
     const title = document.getElementById('notice-title').value.trim();
     const body  = document.getElementById('notice-body').value.trim();
     if (!title) return toast('제목을 입력하세요','warn');
-    await addDoc(collection(db,'usan_notices'), { title, body, important: noticeType==='important', createdAt: serverTimestamp() });
+    await addDoc(collection(db,'usan_notices'), { title, body, important:noticeType==='important', createdAt:serverTimestamp() });
     document.getElementById('notice-title').value = '';
     document.getElementById('notice-body').value  = '';
     noticeType = 'normal';
     closeModal('noticeModal');
+    toast('공지 올라갔습니다!','ok');
 };
 
 window.deleteNotice = async (id) => {
-    if (confirm('공지를 삭제할까요?')) await deleteDoc(doc(db,'usan_notices',id));
+    if (confirm('삭제할까요?')) await deleteDoc(doc(db,'usan_notices',id));
 };
 
 // ══════════════════════════════
 // 참고자료
 // ══════════════════════════════
-onSnapshot(query(collection(db,'usan_refs'), orderBy('createdAt','desc')), snap => {
-    const list = document.getElementById('ref-list');
-    if (snap.empty) { list.innerHTML = '<p class="text-gray-400 text-xs text-center py-4">등록된 참고자료가 없습니다</p>'; return; }
-    list.innerHTML = '';
+function renderRefList(snap, containerId) {
+    const el = document.getElementById(containerId);
+    if (snap.empty) { el.innerHTML='<p class="text-gray-400 text-xs text-center py-4">등록된 참고자료가 없습니다</p>'; return; }
+    el.innerHTML = '';
     snap.forEach(d => {
         const data = d.data();
         const row  = document.createElement('div');
         row.className = 'ref-item';
         row.innerHTML = `
-            <span class="text-base">🔗</span>
+            <span class="text-base flex-none">🔗</span>
             <div class="flex-1 min-w-0">
                 <p class="text-xs font-bold text-gray-700 truncate">${data.title}</p>
-                ${data.desc?`<p class="text-xs text-gray-400 truncate">${data.desc}</p>`:''}
+                ${data.desc?`<p class="text-xs text-gray-400">${data.desc}</p>`:''}
             </div>
             ${data.url?`<a href="${data.url}" target="_blank" class="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg flex-none">열기</a>`:''}
-            ${myRole==='leader'?`<button onclick="deleteRef('${d.id}')" class="text-xs text-gray-300 flex-none">✕</button>`:''}`;
-        list.appendChild(row);
+            ${myRole==='leader'?`<button onclick="deleteRef('${d.id}')" class="text-gray-300 text-xs flex-none ml-1">✕</button>`:''}`;
+        el.appendChild(row);
     });
+}
+
+onSnapshot(query(collection(db,'usan_refs'), orderBy('createdAt','desc')), snap => {
+    renderRefList(snap, 'ref-list');
+    renderRefList(snap, 'ref-list-full');
 });
 
 window.postRef = async () => {
@@ -483,27 +645,127 @@ window.postRef = async () => {
     const url   = document.getElementById('ref-url-input').value.trim();
     const desc  = document.getElementById('ref-desc-input').value.trim();
     if (!title) return toast('제목을 입력하세요','warn');
-    await addDoc(collection(db,'usan_refs'), { title, url, desc, createdAt: serverTimestamp() });
-    document.getElementById('ref-title-input').value = '';
-    document.getElementById('ref-url-input').value   = '';
-    document.getElementById('ref-desc-input').value  = '';
+    await addDoc(collection(db,'usan_refs'), { title, url, desc, createdAt:serverTimestamp() });
+    ['ref-title-input','ref-url-input','ref-desc-input'].forEach(id => document.getElementById(id).value='');
     closeModal('refModal');
+    toast('등록 완료!','ok');
 };
-
-window.deleteRef = async (id) => {
-    if (confirm('삭제할까요?')) await deleteDoc(doc(db,'usan_refs',id));
-};
+window.deleteRef = async (id) => { if(confirm('삭제할까요?')) await deleteDoc(doc(db,'usan_refs',id)); };
 
 // ══════════════════════════════
-// 합주 투표
+// 합주 날짜 투표 (개선된 캘린더 UI)
 // ══════════════════════════════
+let voteYear  = new Date().getFullYear();
+let voteMonth = new Date().getMonth(); // 0-based
+let selectedDates = {}; // { 'YYYY-MM-DD': 'HH:MM' }
 let currentVoteId = null;
 let myVotes = [];
 
+// 캘린더 초기 렌더
+renderVoteCal();
+
+function renderVoteCal() {
+    const label = document.getElementById('vote-month-label');
+    if (!label) return;
+    label.textContent = `${voteYear}년 ${voteMonth+1}월`;
+    const grid = document.getElementById('vote-cal-grid');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(voteYear, voteMonth, 1).getDay();
+    const lastDate = new Date(voteYear, voteMonth+1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    for (let i=0; i<firstDay; i++) {
+        const empty = document.createElement('div'); empty.className='date-cell disabled';
+        grid.appendChild(empty);
+    }
+    for (let d=1; d<=lastDate; d++) {
+        const dateStr = `${voteYear}-${String(voteMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const cellDate = new Date(voteYear, voteMonth, d);
+        const isPast = cellDate < today;
+        const isToday = cellDate.getTime()===today.getTime();
+        const isSel = dateStr in selectedDates;
+        const cell = document.createElement('div');
+        cell.className = `date-cell${isPast?' disabled':isSel?' selected':isToday?' today':''}`;
+        cell.textContent = d;
+        if (!isPast) cell.onclick = () => toggleDateSelect(dateStr, cell);
+        grid.appendChild(cell);
+    }
+    renderSelectedDatesList();
+}
+
+window.changeVoteMonth = (dir) => {
+    voteMonth += dir;
+    if (voteMonth > 11) { voteMonth=0; voteYear++; }
+    if (voteMonth < 0)  { voteMonth=11; voteYear--; }
+    renderVoteCal();
+};
+
+function toggleDateSelect(dateStr, cell) {
+    if (dateStr in selectedDates) {
+        delete selectedDates[dateStr];
+        cell.classList.remove('selected');
+        const d = new Date(dateStr);
+        const isToday = d.getTime()===new Date().setHours(0,0,0,0);
+        if (isToday) cell.classList.add('today');
+    } else {
+        selectedDates[dateStr] = '14:00';
+        cell.classList.add('selected');
+        cell.classList.remove('today');
+    }
+    renderSelectedDatesList();
+}
+
+function renderSelectedDatesList() {
+    const container = document.getElementById('selected-dates-list');
+    const dates = Object.keys(selectedDates).sort();
+    if (!dates.length) {
+        container.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">위에서 날짜를 선택하세요</p>';
+        return;
+    }
+    container.innerHTML = '';
+    dates.forEach(dateStr => {
+        const [y,m,d] = dateStr.split('-');
+        const dayNames = ['일','월','화','수','목','금','토'];
+        const dayName = dayNames[new Date(dateStr).getDay()];
+        const label = `${parseInt(m)}월 ${parseInt(d)}일 (${dayName})`;
+
+        // 30분 단위 시간 옵션 생성
+        const timeOptions = [];
+        for (let h=9; h<=22; h++) {
+            ['00','30'].forEach(min => timeOptions.push(`${String(h).padStart(2,'0')}:${min}`));
+        }
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-blue-50 rounded-xl px-3 py-2';
+        row.innerHTML = `
+            <span class="text-xs font-bold text-blue-800">${label}</span>
+            <select onchange="selectedDates['${dateStr}']=this.value" class="text-xs border border-blue-200 rounded-lg px-2 py-1 bg-white text-blue-700 font-bold">
+                ${timeOptions.map(t=>`<option value="${t}" ${selectedDates[dateStr]===t?'selected':''}>${t}</option>`).join('')}
+            </select>`;
+        container.appendChild(row);
+    });
+}
+
+window.createVote = async () => {
+    const dates = Object.keys(selectedDates).sort();
+    if (!dates.length) return toast('날짜를 선택하세요','warn');
+    const options = dates.map(d => ({ date:d, time:selectedDates[d] }));
+    const existing = await getDocs(collection(db,'usan_vote'));
+    for (const doc_ of existing.docs) await deleteDoc(doc_.ref);
+    await addDoc(collection(db,'usan_vote'), {
+        options, votes:{}, confirmed:false, totalMembers:5, createdAt:serverTimestamp()
+    });
+    selectedDates = {};
+    renderVoteCal();
+    toast('투표가 시작됐습니다! 멤버들에게 알려주세요.','ok');
+};
+
+// 투표 실시간
 onSnapshot(collection(db,'usan_vote'), snap => {
     if (snap.empty) { renderNoVote(); return; }
     currentVoteId = snap.docs[0].id;
-    renderVote(snap.docs[0].id, snap.docs[0].data());
+    renderVote(snap.docs[0].data());
 });
 
 function renderNoVote() {
@@ -514,10 +776,10 @@ function renderNoVote() {
     document.getElementById('confirmed-schedule').classList.add('hidden');
 }
 
-function renderVote(id, data) {
+function renderVote(data) {
     if (data.confirmed) {
         document.getElementById('confirmed-schedule').classList.remove('hidden');
-        document.getElementById('confirmed-date-text').textContent = data.confirmedDate;
+        document.getElementById('confirmed-date-text').textContent = formatDate(data.confirmedDate, data.confirmedTime);
         renderDday(data.confirmedDate);
         document.getElementById('vote-options').innerHTML = '<p class="text-green-600 text-sm text-center py-2">✅ 합주일 확정!</p>';
         document.getElementById('vote-status-badge').textContent = '확정';
@@ -528,7 +790,7 @@ function renderVote(id, data) {
     const options = data.options || [];
     const votes   = data.votes   || {};
     const total   = data.totalMembers || 5;
-    document.getElementById('vote-status-badge').textContent = `투표중 · ${data.deadline||''}`;
+    document.getElementById('vote-status-badge').textContent = `투표중 · ${options.length}개 후보`;
     document.getElementById('submit-vote-btn').classList.remove('hidden');
 
     const container = document.getElementById('vote-options');
@@ -536,21 +798,24 @@ function renderVote(id, data) {
     options.forEach((opt, i) => {
         const voters   = votes[i] || [];
         const count    = voters.length;
-        const pct      = Math.round(count / total * 100);
+        const pct      = Math.round(count/total*100);
         const isMyVote = voters.includes(myPart);
         if (isMyVote && !myVotes.includes(i)) myVotes.push(i);
+
+        const [y,m,d]  = opt.date.split('-');
+        const dayName  = ['일','월','화','수','목','금','토'][new Date(opt.date).getDay()];
+        const dateLabel = `${parseInt(m)}월 ${parseInt(d)}일 (${dayName})`;
+
         const div = document.createElement('div');
-        div.className = `border rounded-xl p-3 cursor-pointer transition-all ${isMyVote?'border-blue-400 bg-blue-50':'border-gray-200'}`;
+        div.className = `border rounded-xl p-3 cursor-pointer ${isMyVote?'border-blue-400 bg-blue-50':'border-gray-200'}`;
         div.innerHTML = `
-            <div class="flex justify-between items-center mb-1.5">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="vcb-${i}" ${isMyVote?'checked':''} onchange="toggleVote(${i})">
-                    <div>
-                        <p class="text-sm font-bold text-gray-800">${opt.date}</p>
-                        <p class="text-xs text-gray-400">${opt.time}</p>
-                    </div>
-                </label>
-                <span class="text-xs font-bold text-blue-600">${count}명</span>
+            <div class="flex items-center gap-2.5 mb-1.5">
+                <input type="checkbox" id="vcb-${i}" ${isMyVote?'checked':''} onchange="toggleVote(${i})">
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800">${dateLabel}</p>
+                    <p class="text-xs text-gray-400">${opt.time} 시작</p>
+                </div>
+                <span class="text-xs font-bold text-blue-600 flex-none">${count}/${total}명</span>
             </div>
             <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div class="vote-bar h-full bg-blue-400 rounded-full" style="width:${pct}%"></div>
@@ -568,12 +833,12 @@ document.getElementById('submit-vote-btn').addEventListener('click', async () =>
     if (!currentVoteId) return;
     const ref  = doc(db,'usan_vote',currentVoteId);
     const snap = await getDoc(ref);
-    const votes = { ...(snap.data().votes || {}) };
-    Object.keys(votes).forEach(k => { votes[k] = (votes[k]||[]).filter(p=>p!==myPart); });
-    myVotes.forEach(i => { if(!votes[i]) votes[i]=[]; votes[i].push(myPart); });
-    await updateDoc(ref, { votes });
+    const votes = { ...(snap.data().votes||{}) };
+    Object.keys(votes).forEach(k => { votes[k]=(votes[k]||[]).filter(p=>p!==myPart); });
+    myVotes.forEach(i => { if(!votes[i])votes[i]=[]; votes[i].push(myPart); });
+    await updateDoc(ref,{votes});
     toast('투표 완료!','ok');
-    myVotes = [];
+    myVotes=[];
 });
 
 document.getElementById('confirm-vote-btn').addEventListener('click', async () => {
@@ -581,56 +846,133 @@ document.getElementById('confirm-vote-btn').addEventListener('click', async () =
     const snap = await getDoc(doc(db,'usan_vote',currentVoteId));
     const { options=[], votes={} } = snap.data();
     let bestIdx=0, bestCount=0;
-    options.forEach((_,i) => { const c=(votes[i]||[]).length; if(c>bestCount){bestCount=c;bestIdx=i;} });
-    const confirmed = `${options[bestIdx].date} ${options[bestIdx].time}`;
-    if (!confirm(`"${confirmed}"으로 확정할까요?`)) return;
-    await updateDoc(doc(db,'usan_vote',currentVoteId), { confirmed:true, confirmedDate:confirmed });
+    options.forEach((_,i)=>{ const c=(votes[i]||[]).length; if(c>bestCount){bestCount=c;bestIdx=i;} });
+    const opt = options[bestIdx];
+    const [y,m,d] = opt.date.split('-');
+    const dayName = ['일','월','화','수','목','금','토'][new Date(opt.date).getDay()];
+    const label = `${parseInt(m)}월 ${parseInt(d)}일 (${dayName}) ${opt.time}`;
+    if (!confirm(`"${label}"으로 확정할까요?`)) return;
+    await updateDoc(doc(db,'usan_vote',currentVoteId), { confirmed:true, confirmedDate:opt.date, confirmedTime:opt.time });
+    toast('합주일이 확정됐습니다!','ok');
 });
 
-window.createVote = async () => {
-    const dates = [...document.querySelectorAll('.vote-date-input')];
-    const times = [...document.querySelectorAll('.vote-time-input')];
-    const opts  = dates.map((d,i)=>d.value?{date:d.value,time:times[i]?.value||'14:00'}:null).filter(Boolean);
-    if (!opts.length) return toast('날짜를 입력하세요','warn');
-    const existing = await getDocs(collection(db,'usan_vote'));
-    for (const d of existing.docs) await deleteDoc(d.ref);
-    await addDoc(collection(db,'usan_vote'), {
-        options:opts, deadline:document.getElementById('vote-deadline').value,
-        votes:{}, confirmed:false, totalMembers:5, createdAt:serverTimestamp()
-    });
-    toast('투표 시작!','ok');
-};
-
-window.addDateInput = () => {
-    const c = document.getElementById('date-inputs');
-    const d = document.createElement('div');
-    d.className = 'flex gap-2';
-    d.innerHTML = `<input type="date" class="vote-date-input flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm"><input type="time" class="vote-time-input w-28 px-3 py-2 border border-gray-200 rounded-xl text-sm" value="14:00">`;
-    c.appendChild(d);
-};
+function formatDate(dateStr, timeStr) {
+    if (!dateStr) return '';
+    const [y,m,d] = dateStr.split('-');
+    const dayName = ['일','월','화','수','목','금','토'][new Date(dateStr).getDay()];
+    return `${parseInt(m)}월 ${parseInt(d)}일 (${dayName}) ${timeStr||''}`;
+}
 
 function renderDday(dateStr) {
-    const parts    = dateStr.split(' ');
-    const dateOnly = parts[0];
-    const timeOnly = parts.slice(1).join(' ');
-    const diff     = Math.ceil((new Date(dateOnly)-new Date())/86400000);
+    const target = new Date(dateStr); target.setHours(0,0,0,0);
+    const today  = new Date(); today.setHours(0,0,0,0);
+    const diff   = Math.round((target-today)/86400000);
     const ddayText = diff>0?`D-${diff}`:diff===0?'D-Day!':'지남';
+    const snap_  = (() => { const s=doc(db,'usan_system','band_info'); return null; })();
+    const studioEl = document.getElementById('confirmed-studio-text');
     document.getElementById('dday-content').innerHTML = `
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-base font-bold text-gray-800">${dateOnly}</p>
-                <p class="text-xs text-gray-500">${timeOnly}</p>
+                <p class="text-base font-bold text-gray-800">${formatDate(dateStr, document.getElementById('confirmed-date-text')?.textContent?.split(' ').pop()||'')}</p>
             </div>
             <div class="text-2xl font-bold text-blue-600">${ddayText}</div>
         </div>`;
 }
 
 // ══════════════════════════════
-// 연습곡 (자료실 통합)
+// 후보곡 투표 (자료실 탭)
 // ══════════════════════════════
-const STATUS_LABEL = { candidate:'후보곡', practice:'연습중', done:'완료' };
-const STATUS_CLASS = { candidate:'badge-candidate', practice:'badge-practice', done:'badge-done' };
-const PROG_COLOR   = { candidate:'#93c5fd', practice:'#fcd34d', done:'#6ee7b7' };
+let totalMembers = 5;
+onSnapshot(collection(db,'usan_band'), snap => { totalMembers = snap.size; });
+
+onSnapshot(query(collection(db,'usan_song_votes'), orderBy('createdAt','desc')), async snap => {
+    const list = document.getElementById('song-vote-list');
+    const badge = document.getElementById('song-vote-badge');
+    if (snap.empty) {
+        list.innerHTML='<p class="text-gray-400 text-xs text-center py-3">후보곡이 없습니다</p>';
+        badge.textContent='후보 없음'; return;
+    }
+    badge.textContent=`${snap.size}곡 후보중`;
+    list.innerHTML='';
+    for (const d of snap.docs) {
+        const data   = d.data();
+        const voters = data.voters || [];
+        const count  = voters.length;
+        const pct    = Math.round(count/Math.max(totalMembers,1)*100);
+        const iVoted = voters.includes(myPart);
+        const passed = count >= Math.ceil(totalMembers/2); // 과반수
+
+        const item = document.createElement('div');
+        item.className = `song-vote-item${iVoted?' voted':''}`;
+        item.innerHTML = `
+            <div class="flex justify-between items-start mb-1">
+                <div class="flex-1 min-w-0 mr-2">
+                    <p class="text-sm font-bold text-gray-800 truncate">${data.title}</p>
+                    <p class="text-xs text-gray-400">${data.artist||''}</p>
+                </div>
+                <div class="flex items-center gap-1.5 flex-none">
+                    ${passed?'<span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-bold">확정!</span>':''}
+                    <span class="text-xs font-bold text-blue-600">${count}표</span>
+                </div>
+            </div>
+            <div class="vote-bar-bg"><div class="vote-bar-fill" style="width:${pct}%"></div></div>
+            <div class="flex justify-between items-center mt-2">
+                <p class="text-xs text-gray-400">${voters.join(', ')||'없음'}</p>
+                <div class="flex gap-1.5">
+                    ${data.youtube?`<a href="${data.youtube}" target="_blank" class="text-xs text-blue-500 border border-blue-200 px-2 py-0.5 rounded-lg">▶ 듣기</a>`:''}
+                    ${!iVoted&&!passed?`<button onclick="voteSong('${d.id}')" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-lg font-bold">투표</button>`:''}
+                    ${iVoted&&!passed?`<button onclick="unvoteSong('${d.id}','${JSON.stringify(voters).replace(/'/g,'')}') " class="text-xs border border-gray-200 text-gray-400 px-2 py-0.5 rounded-lg">취소</button>`:''}
+                    ${passed&&myRole==='leader'?`<button onclick="confirmSong('${d.id}','${data.title}','${data.artist||''}')" class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-lg font-bold">연습곡 등록</button>`:''}
+                    ${myRole==='leader'?`<button onclick="deleteSongVote('${d.id}')" class="text-xs text-gray-300 px-1">✕</button>`:''}
+                </div>
+            </div>`;
+        list.appendChild(item);
+    }
+});
+
+window.suggestSong = async () => {
+    const title   = document.getElementById('suggest-title').value.trim();
+    const artist  = document.getElementById('suggest-artist').value.trim();
+    const youtube = document.getElementById('suggest-youtube').value.trim();
+    if (!title) return toast('곡 제목을 입력하세요','warn');
+    await addDoc(collection(db,'usan_song_votes'), { title, artist, youtube, voters:[myPart], createdAt:serverTimestamp() });
+    ['suggest-title','suggest-artist','suggest-youtube'].forEach(id=>document.getElementById(id).value='');
+    closeModal('suggestSongModal');
+    toast('제안 완료! 자동으로 투표가 시작됩니다.','ok');
+};
+
+window.voteSong = async (id) => {
+    const ref  = doc(db,'usan_song_votes',id);
+    const snap = await getDoc(ref);
+    const voters = snap.data().voters || [];
+    if (voters.includes(myPart)) return toast('이미 투표했습니다','warn');
+    await updateDoc(ref,{ voters:[...voters, myPart] });
+};
+
+window.unvoteSong = async (id) => {
+    const ref  = doc(db,'usan_song_votes',id);
+    const snap = await getDoc(ref);
+    const voters = (snap.data().voters||[]).filter(v=>v!==myPart);
+    await updateDoc(ref,{voters});
+};
+
+window.confirmSong = async (id, title, artist) => {
+    if (!confirm(`"${title}"을 연습곡으로 등록할까요?`)) return;
+    await addDoc(collection(db,'usan_songs'), { title, artist, status:'practice', progress:{}, createdAt:serverTimestamp() });
+    await deleteDoc(doc(db,'usan_song_votes',id));
+    toast(`"${title}" 연습곡 등록!`,'ok');
+};
+
+window.deleteSongVote = async (id) => {
+    if (confirm('후보곡을 삭제할까요?')) await deleteDoc(doc(db,'usan_song_votes',id));
+};
+
+// ══════════════════════════════
+// 연습곡 (리더: 삭제/수정, 파일 업로드)
+// ══════════════════════════════
+const STATUS_LABEL = { practice:'연습중', done:'완료' };
+const STATUS_CLASS = { practice:'badge-practice', done:'badge-done' };
+const PROG_COLOR   = { practice:'#fcd34d', done:'#6ee7b7' };
 
 let allSongs = [];
 let currentFilter = 'all';
@@ -646,94 +988,86 @@ onSnapshot(collection(db,'usan_songs'), snap => {
 function renderSongs() {
     const list     = document.getElementById('song-list');
     const filtered = currentFilter==='all' ? allSongs : allSongs.filter(s=>s.status===currentFilter);
-    if (!filtered.length) { list.innerHTML='<p class="text-gray-400 text-sm text-center py-6">곡이 없습니다</p>'; return; }
-    list.innerHTML = '';
+    if (!filtered.length) { list.innerHTML='<p class="text-gray-400 text-sm text-center py-8">곡이 없습니다</p>'; return; }
+    list.innerHTML='';
     filtered.forEach(s => {
-        const prog   = s.progress || {};
+        const prog   = s.progress||{};
         const parts  = Object.keys(prog);
         const avg    = parts.length ? Math.round(parts.reduce((a,p)=>a+(prog[p]||0),0)/parts.length) : 0;
-        const myProg = prog[myPart] || 0;
+        const myProg = prog[myPart]||0;
         const card   = document.createElement('div');
         card.className = 'song-card bg-white rounded-2xl shadow-sm overflow-hidden';
         card.innerHTML = `
-            <!-- 헤더 (탭 역할) -->
             <div class="p-4 cursor-pointer" onclick="toggleSongCard('${s.id}')">
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex-1 min-w-0 mr-2">
                         <p class="font-bold text-gray-800 text-sm truncate">${s.title}</p>
                         <p class="text-xs text-gray-400">${s.artist||''}</p>
                     </div>
-                    <span class="text-xs px-2 py-0.5 rounded-full font-bold flex-none ${STATUS_CLASS[s.status]}">${STATUS_LABEL[s.status]}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-bold flex-none ${STATUS_CLASS[s.status]||'badge-practice'}">${STATUS_LABEL[s.status]||s.status}</span>
                 </div>
-                <!-- 팀 진도바 -->
                 <div class="flex items-center gap-2">
                     <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full" style="width:${avg}%;background:${PROG_COLOR[s.status]};transition:width .4s"></div>
+                        <div class="h-full rounded-full" style="width:${avg}%;background:${PROG_COLOR[s.status]||'#93c5fd'};transition:width .4s"></div>
                     </div>
                     <span class="text-xs text-gray-400 flex-none">팀 ${avg}% / 나 ${myProg}%</span>
                 </div>
             </div>
-            <!-- 펼침: 자료 + 관리 -->
-            <div id="song-detail-${s.id}" class="song-detail border-t border-gray-100">
-                <!-- 파일 목록 -->
-                <div id="file-list-${s.id}" class="divide-y divide-gray-50"></div>
-                <!-- 리더 전용 버튼 -->
+            <div id="sd-${s.id}" class="song-detail border-t border-gray-100">
+                <div id="fl-${s.id}" class="divide-y divide-gray-50"></div>
                 ${myRole==='leader'?`
-                <div class="p-3 space-y-2">
-                    <button onclick="openFileModal('${s.id}','${s.title}')" class="w-full py-2 border border-dashed border-blue-200 text-blue-500 rounded-xl text-xs font-bold">+ 악보 / 음원 / 링크 업로드</button>
+                <div class="p-3 space-y-2 bg-gray-50">
+                    <button onclick="openFileModal('${s.id}','${s.title.replace(/'/g,"\\'")}');event.stopPropagation();" class="w-full py-2 border border-dashed border-blue-200 text-blue-500 rounded-xl text-xs font-bold">+ 악보 / 음원 / 링크 업로드</button>
                     <div class="flex gap-2">
-                        <select onchange="changeSongStatus('${s.id}',this.value)" class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5">
-                            <option value="candidate" ${s.status==='candidate'?'selected':''}>후보곡</option>
-                            <option value="practice"  ${s.status==='practice'?'selected':''}>연습중</option>
-                            <option value="done"      ${s.status==='done'?'selected':''}>완료</option>
+                        <select onchange="changeSongStatus('${s.id}',this.value)" class="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                            <option value="practice" ${s.status==='practice'?'selected':''}>연습중</option>
+                            <option value="done"     ${s.status==='done'?'selected':''}>완료</option>
                         </select>
-                        <button onclick="deleteSong('${s.id}')" class="text-xs text-red-400 border border-red-200 rounded-lg px-3 py-1.5">삭제</button>
+                        <button onclick="deleteSong('${s.id}');event.stopPropagation();" class="text-xs text-red-400 border border-red-200 rounded-lg px-3 py-1.5">삭제</button>
                     </div>
                 </div>`:''}
             </div>`;
         list.appendChild(card);
-        // 파일 실시간 로드
         loadSongFiles(s.id);
     });
 }
 
 function loadSongFiles(songId) {
     onSnapshot(collection(db,`usan_songs/${songId}/files`), snap => {
-        const container = document.getElementById(`file-list-${songId}`);
-        if (!container) return;
-        if (snap.empty) { container.innerHTML = '<p class="text-xs text-gray-400 text-center py-3">업로드된 자료가 없습니다</p>'; return; }
-        container.innerHTML = '';
+        const c = document.getElementById(`fl-${songId}`);
+        if (!c) return;
+        if (snap.empty) { c.innerHTML='<p class="text-xs text-gray-400 text-center py-3">업로드된 자료 없음</p>'; return; }
+        c.innerHTML='';
         snap.forEach(d => {
             const data = d.data();
-            const typeIcon = data.type==='score'?'📄':data.type==='track'?'🎧':'🔗';
-            const typeLabel= data.type==='score'?'악보':data.type==='track'?'음원':'링크';
-            const typeBg   = data.type==='score'?'bg-red-50 text-red-600':data.type==='track'?'bg-green-50 text-green-600':'bg-blue-50 text-blue-600';
+            const icons = {score:'📄',track:'🎧',link:'🔗'};
+            const labels = {score:'악보',track:'음원',link:'링크'};
+            const bgs    = {score:'bg-red-50 text-red-600',track:'bg-green-50 text-green-600',link:'bg-blue-50 text-blue-600'};
             const row = document.createElement('div');
-            row.className = 'file-row';
-            row.innerHTML = `
-                <span class="text-xs font-bold px-1.5 py-0.5 rounded ${typeBg} flex-none">${typeIcon} ${typeLabel}</span>
-                <span class="text-xs text-gray-700 flex-1 truncate">${data.name}</span>
-                ${data.size?`<span class="text-xs text-gray-400 flex-none">${data.size}</span>`:''}
+            row.className='file-row';
+            const partLabel = data.part ? ` · ${data.part}` : '';
+            row.innerHTML=`
+                <span class="text-xs font-bold px-1.5 py-0.5 rounded ${bgs[data.type]||'bg-gray-100 text-gray-500'} flex-none">${icons[data.type]||'📎'} ${labels[data.type]||''}</span>
+                <span class="text-xs text-gray-700 flex-1 truncate">${data.name}${partLabel}</span>
                 ${data.url?`<a href="${data.url}" target="_blank" class="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg flex-none">받기</a>`:''}
-                ${myRole==='leader'?`<button onclick="deleteSongFile('${songId}','${d.id}')" class="text-xs text-gray-300 flex-none">✕</button>`:''}`;
-            container.appendChild(row);
+                ${myRole==='leader'?`<button onclick="deleteSongFile('${songId}','${d.id}')" class="text-gray-300 text-xs flex-none ml-1">✕</button>`:''}`;
+            c.appendChild(row);
         });
     });
 }
 
 window.toggleSongCard = (id) => {
-    const detail = document.getElementById(`song-detail-${id}`);
-    const card   = detail.closest('.song-card');
-    const isOpen = detail.classList.contains('open');
-    // 다른 카드 닫기
-    document.querySelectorAll('.song-detail.open').forEach(el => { el.classList.remove('open'); el.closest('.song-card').classList.remove('expanded'); });
-    if (!isOpen) { detail.classList.add('open'); card.classList.add('expanded'); }
+    const detail = document.getElementById(`sd-${id}`);
+    const card   = detail?.closest('.song-card');
+    const isOpen = detail?.classList.contains('open');
+    document.querySelectorAll('.song-detail.open').forEach(el=>{el.classList.remove('open');el.closest('.song-card')?.classList.remove('expanded');});
+    if (!isOpen) { detail?.classList.add('open'); card?.classList.add('expanded'); }
 };
 
 window.filterSongs = (status, btn) => {
-    currentFilter = status;
-    document.querySelectorAll('.song-filter-btn').forEach(b => { b.className='song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold'; });
-    btn.className = 'song-filter-btn flex-none px-3 py-1.5 bg-blue-600 text-white rounded-full text-xs font-bold';
+    currentFilter=status;
+    document.querySelectorAll('.song-filter-btn').forEach(b=>{b.className='song-filter-btn flex-none px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold';});
+    btn.className='song-filter-btn flex-none px-3 py-1.5 bg-blue-600 text-white rounded-full text-xs font-bold';
     renderSongs();
 };
 
@@ -742,80 +1076,89 @@ window.addSong = async () => {
     const artist = document.getElementById('song-artist-input').value.trim();
     const status = document.getElementById('song-status-input').value;
     if (!title) return toast('곡 제목을 입력하세요','warn');
-    await addDoc(collection(db,'usan_songs'), { title, artist, status, progress:{}, createdAt:serverTimestamp() });
-    document.getElementById('song-title-input').value  = '';
-    document.getElementById('song-artist-input').value = '';
+    await addDoc(collection(db,'usan_songs'),{title,artist,status,progress:{},createdAt:serverTimestamp()});
+    document.getElementById('song-title-input').value='';
+    document.getElementById('song-artist-input').value='';
     closeModal('songModal');
+    toast('연습곡 추가!','ok');
 };
 
 window.changeSongStatus = async (id, status) => {
-    await updateDoc(doc(db,'usan_songs',id), { status });
+    await updateDoc(doc(db,'usan_songs',id),{status});
+    toast(status==='done'?'완료 처리!':'연습중으로 변경','ok');
 };
 
 window.deleteSong = async (id) => {
-    if (confirm('곡과 모든 자료를 삭제할까요?')) await deleteDoc(doc(db,'usan_songs',id));
+    if (confirm('곡과 모든 자료를 삭제할까요?')) { await deleteDoc(doc(db,'usan_songs',id)); toast('삭제됨','ok'); }
 };
 
-// 파일 업로드 모달
+// 파일 업로드
 window.openFileModal = (songId, songTitle) => {
-    currentUploadSongId = songId;
-    currentFileType     = 'score';
-    document.getElementById('file-modal-song-name').textContent = songTitle;
+    currentUploadSongId=songId;
+    document.getElementById('file-modal-song-name').textContent=songTitle;
     setFileType('score');
     openModal('fileModal');
 };
 
 window.setFileType = (t) => {
-    currentFileType = t;
-    ['score','track','ref'].forEach(k => {
-        const btn = document.getElementById(`ft-${k}`);
-        if (!btn) return;
-        btn.className = `flex-1 py-2 rounded-xl text-xs font-bold ${t===k?'bg-blue-600 text-white':'bg-gray-100 text-gray-600'}`;
+    currentFileType=t;
+    ['score','track','link'].forEach(k=>{
+        const btn=document.getElementById(`ft-${k}`);
+        if(btn) btn.className=`flex-1 py-2 rounded-xl text-xs font-bold ${t===k?'bg-blue-600 text-white':'bg-gray-100 text-gray-600'}`;
+        const area=document.getElementById(`upload-${k}-area`);
+        if(area) area.classList.toggle('hidden',t!==k);
     });
 };
 
 window.uploadSongFile = async () => {
-    const name = document.getElementById('file-name-input').value.trim();
-    const url  = document.getElementById('file-url-input').value.trim();
-    const size = document.getElementById('file-size-input').value.trim();
-    if (!name) return toast('파일명을 입력하세요','warn');
     if (!currentUploadSongId) return;
-    await addDoc(collection(db,`usan_songs/${currentUploadSongId}/files`), {
-        name, url, size, type: currentFileType, uploadedAt: serverTimestamp()
+    let name='', url='', part='';
+    if (currentFileType==='score') {
+        name=document.getElementById('score-name').value.trim();
+        url =document.getElementById('score-url').value.trim();
+        part=document.getElementById('score-part').value.trim();
+    } else if (currentFileType==='track') {
+        name=document.getElementById('track-name').value.trim();
+        url =document.getElementById('track-url').value.trim();
+        part=document.getElementById('track-part').value;
+    } else {
+        name=document.getElementById('link-title').value.trim();
+        url =document.getElementById('link-url').value.trim();
+    }
+    if (!name) return toast('파일명/제목을 입력하세요','warn');
+    await addDoc(collection(db,`usan_songs/${currentUploadSongId}/files`),{
+        name,url,part,type:currentFileType, uploadedAt:serverTimestamp()
     });
-    document.getElementById('file-name-input').value = '';
-    document.getElementById('file-url-input').value  = '';
-    document.getElementById('file-size-input').value = '';
+    ['score-name','score-url','score-part','track-name','track-url','link-title','link-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     closeModal('fileModal');
     toast('업로드 완료!','ok');
 };
 
-window.deleteSongFile = async (songId, fileId) => {
-    if (confirm('삭제할까요?')) await deleteDoc(doc(db,`usan_songs/${songId}/files`,fileId));
+window.deleteSongFile = async (songId,fileId) => {
+    if(confirm('삭제할까요?')) await deleteDoc(doc(db,`usan_songs/${songId}/files`,fileId));
 };
 
-// 진도 업데이트
 function updateProgressSelect() {
-    const sel = document.getElementById('progress-song-select');
-    const prev = sel.value;
-    sel.innerHTML = '<option value="">연습중인 곡 선택...</option>';
-    allSongs.filter(s=>s.status==='practice').forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id; opt.textContent = s.title;
-        if (s.id===prev) opt.selected = true;
+    const sel=document.getElementById('progress-song-select');
+    const prev=sel.value;
+    sel.innerHTML='<option value="">연습중인 곡 선택...</option>';
+    allSongs.filter(s=>s.status==='practice').forEach(s=>{
+        const opt=document.createElement('option');
+        opt.value=s.id; opt.textContent=s.title;
+        if(s.id===prev) opt.selected=true;
         sel.appendChild(opt);
     });
 }
 
-document.getElementById('progress-range').addEventListener('input', function() {
-    document.getElementById('progress-val').textContent = this.value + '%';
+document.getElementById('progress-range').addEventListener('input',function(){
+    document.getElementById('progress-val').textContent=this.value+'%';
 });
 
 window.updateProgress = async () => {
-    const songId = document.getElementById('progress-song-select').value;
-    const val    = parseInt(document.getElementById('progress-range').value);
-    if (!songId) return toast('곡을 선택하세요','warn');
-    await updateDoc(doc(db,'usan_songs',songId), { [`progress.${myPart}`]: val });
+    const songId=document.getElementById('progress-song-select').value;
+    const val=parseInt(document.getElementById('progress-range').value);
+    if(!songId) return toast('곡을 선택하세요','warn');
+    await updateDoc(doc(db,'usan_songs',songId),{[`progress.${myPart}`]:val});
     toast(`진도 ${val}% 저장!`,'ok');
 };
 
@@ -825,26 +1168,25 @@ window.updateProgress = async () => {
 window.openTab = (name) => {
     document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-    document.getElementById(`tab-${name}`).classList.add('active');
-    const idx = ['home','schedule','songs','members'].indexOf(name);
+    document.getElementById(`tab-${name}`)?.classList.add('active');
+    const idx=['home','schedule','library','songs','members'].indexOf(name);
     document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
 };
 
-window.openModal  = (id) => document.getElementById(id).classList.add('open');
-window.closeModal = (id) => document.getElementById(id).classList.remove('open');
-document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+window.openModal  = (id) => document.getElementById(id)?.classList.add('open');
+window.closeModal = (id) => document.getElementById(id)?.classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+    m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
 });
 
-// ── 토스트 ──
-function toast(msg, type='ok') {
-    const colors = { ok:['#14532d','#86efac'], warn:['#713f12','#fde68a'], err:['#7f1d1d','#fca5a5'] };
-    const [bg,color] = colors[type]||colors.ok;
-    const el = document.createElement('div');
-    el.style.cssText = `position:fixed;top:1.25rem;left:50%;transform:translateX(-50%);background:${bg};color:${color};padding:.55rem 1.1rem;border-radius:.75rem;font-size:.8rem;font-weight:700;z-index:999;white-space:nowrap;`;
-    el.textContent = msg;
+function toast(msg,type='ok') {
+    const c={ok:['#14532d','#86efac'],warn:['#713f12','#fde68a'],err:['#7f1d1d','#fca5a5']};
+    const [bg,col]=c[type]||c.ok;
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;top:1.25rem;left:50%;transform:translateX(-50%);background:${bg};color:${col};padding:.55rem 1.1rem;border-radius:.75rem;font-size:.8rem;font-weight:700;z-index:999;white-space:nowrap;`;
+    el.textContent=msg;
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 2400);
+    setTimeout(()=>el.remove(),2400);
 }
 </script>
 </body>
